@@ -1,0 +1,49 @@
+# Virtual environment
+ml-env/
+.venv/
+venv/
+env/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+dist/
+build/
+
+# Jupyter
+.ipynb_checkpoints/
+*.ipynb
+
+# Logs and setup artifacts
+setup-*.log
+*.log
+
+# Backups
+*.tar.gz
+requirements-backup-*.txt
+ml-env-backup-*.tar.gz
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*.swn
+
+# OS
+.DS_Store
+Thumbs.db
+.directory
+
+# Claude Code (project-specific, generated)
+.claude/
+
+# uv cache
+.uv/
+
+# Environment-specific files
+requirements-installed.txt
