@@ -1,11 +1,23 @@
 # Universal ML Environment Setup
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![GitHub](https://img.shields.io/github/stars/ianbarber/ml-env-setup?style=social)](https://github.com/ianbarber/ml-env-setup)
+
 A portable setup script for creating a standardized ML environment with PyTorch 2.9.0. **Automatically detects your hardware** and installs the appropriate PyTorch build for:
 
 - **NVIDIA GPUs**: RTX 3090, 4060, 5090, GB200, etc. (CUDA 12.8/13.0)
 - **AMD GPUs**: RDNA, Strix Halo (ROCm 6.2/7.9)
 - **CPU-only**: No GPU systems
 - **WSL2**: Windows Subsystem for Linux support
+
+## Features
+
+- 🔍 **Auto-detection**: Identifies your hardware and installs the right PyTorch build
+- 🚀 **Fast setup**: Uses `uv` for faster package installation
+- 🤖 **Claude Code integration**: Generates skills for environment context
+- 📝 **Comprehensive docs**: Hardware-specific guides for all supported GPUs
+- ✅ **Validation**: Built-in testing to verify your installation
+- 🔄 **WSL2 support**: Works seamlessly on Windows Subsystem for Linux
 
 ## Quick Start
 
@@ -269,6 +281,52 @@ If uv cannot find Python 3.14:
 1. Edit `setup-universal.sh` and change `PYTHON_VERSION="3.14"` to `"3.12"` or `"3.11"`
 2. Run the setup again
 
+## Contributing
+
+Contributions are welcome! This project uses Claude Code for automated code reviews.
+
+### How to Contribute
+
+1. Fork the repository
+2. Create a feature branch: `git checkout -b feature/amazing-feature`
+3. Make your changes
+4. Run validation: `./validate.sh`
+5. Commit your changes: `git commit -m "Add amazing feature"`
+6. Push to the branch: `git push origin feature/amazing-feature`
+7. Open a Pull Request
+
+### Claude Code Reviews
+
+This repository uses automated Claude Code reviews for PRs. The bot will:
+- Review your code for security issues
+- Check for bugs and code quality
+- Suggest improvements
+
+You can also mention `@claude` in PR comments for specific questions.
+
+See [CLAUDE_WEBHOOK.md](CLAUDE_WEBHOOK.md) for setup details.
+
+## Support
+
+- **Issues**: Open an issue on GitHub
+- **Discussions**: Use GitHub Discussions for questions
+- **Documentation**: See the guides in this repo:
+  - [HARDWARE.md](HARDWARE.md) - Hardware-specific setup
+  - [STRIX_HALO.md](STRIX_HALO.md) - Strix Halo guide
+  - [UPDATE.md](UPDATE.md) - Updating and maintenance
+  - [CLAUDE_WEBHOOK.md](CLAUDE_WEBHOOK.md) - CI/CD setup
+
+## Credits
+
+Created with assistance from Claude Code.
+
+Special thanks to:
+- AMD ROCm team and community for Strix Halo support
+- @scottt and @jammm for gfx1151 PyTorch builds
+- uv team for fast Python package management
+
 ## License
+
+MIT License - see [LICENSE](LICENSE) file for details.
 
 Free to use and modify for your ML projects.
