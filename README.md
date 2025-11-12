@@ -14,76 +14,105 @@ A portable setup script for creating a standardized ML environment with PyTorch 
 
 - 🔍 **Auto-detection**: Identifies your hardware and installs the right PyTorch build
 - 🚀 **Fast setup**: Uses `uv` for faster package installation
-- 🤖 **Claude Code integration**: Generates skills for environment context
+- 🎯 **Single command**: One script creates complete project with ML environment
+- 🤖 **Claude Code integration**: Auto-generated skill for environment help
 - 📝 **Comprehensive docs**: Hardware-specific guides for all supported GPUs
 - ✅ **Validation**: Built-in testing to verify your installation
 - 🔄 **WSL2 support**: Works seamlessly on Windows Subsystem for Linux
+- 📦 **Project-ready**: Includes .gitignore, documentation, and validation tools
 
 ## Quick Start
 
-### First Time Setup (Recommended - Universal Script)
+### Prerequisites
 
-1. Install uv if you haven't already:
+Install uv if you haven't already:
 ```bash
 curl -LsSf https://astral.sh/uv/install.sh | sh
 ```
 
-2. Run the universal setup script (auto-detects your hardware):
+### Clone This Repository
+
 ```bash
-cd /home/ianbarber/ml-env-setup
-./setup-universal.sh
+git clone https://github.com/ianbarber/ml-env-setup.git
+cd ml-env-setup
 ```
 
-3. Verify the installation:
+### Create Your ML Project
+
+**One simple command:**
+
 ```bash
+# Create a new project in current directory
+./setup.sh
+
+# Or create a new project with a specific name
+./setup.sh my-ml-project
+
+# Or create at a specific path
+./setup.sh /path/to/my-project
+```
+
+**That's it!** The script will:
+- ✅ Create the project directory
+- ✅ Detect your hardware (NVIDIA/AMD/CPU)
+- ✅ Install PyTorch with the right backend
+- ✅ Set up ML libraries (numpy, pandas, scikit-learn, etc.)
+- ✅ Create a Claude Code skill for environment help
+- ✅ Add a .gitignore
+- ✅ Validate the installation
+
+### Start Coding
+
+```bash
+cd my-ml-project
+source ml-env/bin/activate
+python your_script.py
+```
+
+### Example: Complete Workflow
+
+```bash
+# Clone the setup repo
+git clone https://github.com/ianbarber/ml-env-setup.git
+
+# Create your project
+cd ml-env-setup
+./setup.sh my-awesome-ai-project
+
+# Start working
+cd my-awesome-ai-project
+source ml-env/bin/activate
+
+# Verify everything works
 ./validate.sh
+
+# Start coding!
+python train_model.py
 ```
 
-4. Activate the environment:
-```bash
-source /home/ianbarber/ml-env-setup/ml-env/bin/activate
-```
+## How It Works
 
-### Using in New Projects
+The `setup.sh` script:
 
-#### Option 1: Use Shared Environment (Recommended)
+1. **Creates Project Directory**: Makes the directory if it doesn't exist
+2. **Copies Setup Scripts**: Includes setup-universal.sh, validate.sh, and generate-skill.sh
+3. **Copies Documentation**: Adds README, HARDWARE guide, and Strix Halo docs
+4. **Creates .gitignore**: Ignores common ML files (models, data, logs, etc.)
+5. **Detects Hardware**: Runs setup-universal.sh which:
+   - Checks for NVIDIA GPUs (via `nvidia-smi`)
+   - Checks for AMD GPUs (via `rocminfo`)
+   - Falls back to CPU if no GPU found
+   - Detects WSL2 environment
+6. **Installs PyTorch**: Chooses the right build:
+   - NVIDIA: CUDA 12.8 or 13.0
+   - AMD: ROCm 6.4.4+ or 7.9 (for Strix Halo: gfx1151 builds)
+   - CPU: CPU-only build
+7. **Installs ML Libraries**: numpy, pandas, scikit-learn, jupyter, etc.
+8. **Creates Claude Skill**: Generates `.claude/skills/ml-env/` for environment help
+9. **Validates Installation**: Runs tests to verify everything works
+10. **Offers Git Init**: Optionally initializes git with good commit message
 
-Use the ml-env-setup environment from all projects:
-
-1. Generate a Claude Code skill for your project:
-```bash
-/home/ianbarber/ml-env-setup/generate-skill.sh /path/to/your/project
-```
-
-This creates `.claude/skills/ml-env/` in your project directory.
-
-2. Activate the environment when working on your project:
-```bash
-source /home/ianbarber/ml-env-setup/ml-env/bin/activate
-```
-
-3. Claude Code will automatically use the skill when you ask about the environment, running code, or PyTorch.
-
-**Benefits**: Shares one environment across all projects, saving disk space and installation time.
-
-#### Option 2: Project-Specific Environment
-
-Create an isolated environment for each project:
-
-1. Copy the setup scripts to your project:
-```bash
-cp /home/ianbarber/ml-env-setup/setup-universal.sh /path/to/your/project/
-cp /home/ianbarber/ml-env-setup/validate.sh /path/to/your/project/
-cp /home/ianbarber/ml-env-setup/generate-skill.sh /path/to/your/project/
-```
-
-2. Run the setup in your project directory:
-```bash
-cd /path/to/your/project
-./setup-universal.sh  # Creates ml-env/ and .claude/skills/ml-env/ in project
-```
-
-The script will automatically detect your hardware and install the appropriate PyTorch build, then create a Claude Code skill with the correct environment path.
+Each project gets its own isolated environment, so you can have different PyTorch versions or packages per project.
 
 ## What Gets Installed
 
@@ -96,28 +125,37 @@ The script will automatically detect your hardware and install the appropriate P
 - **Essential ML libraries**: numpy, pandas, matplotlib, scikit-learn
 - **Development tools**: jupyter, ipython, tqdm, tensorboard
 
-## Directory Structure
+## What You Get
+
+After running `./setup.sh`, your project will have:
 
 ```
-ml-env-setup/
-├── setup-universal.sh     # Universal setup script (auto-detects hardware)
-├── validate.sh            # Environment validation script
-├── generate-skill.sh      # Generates Claude Code skill for projects
-├── README.md              # This file
-├── UPDATE.md              # Version checking and update procedures
-├── HARDWARE.md            # Machine-specific setup guides
-└── STRIX_HALO.md          # Strix Halo (gfx1151) quick reference
+your-project/
+├── ml-env/                  # Python virtual environment with PyTorch
+├── .claude/
+│   └── skills/
+│       └── ml-env/          # Claude Code skill (auto-activated)
+├── setup-universal.sh       # The setup script (for reference)
+├── validate.sh              # Test your installation
+├── generate-skill.sh        # Skill generator (for reference)
+├── .gitignore               # Ignores ml-env, logs, etc.
+├── README.md                # Documentation
+├── HARDWARE.md              # Hardware-specific guides
+├── STRIX_HALO.md            # Strix Halo reference (if applicable)
+└── UPDATE.md                # Maintenance and updating guide
 ```
 
-## Documentation
+## Documentation in This Repo
 
-- **setup-universal.sh**: Universal setup script that auto-detects your hardware (RECOMMENDED)
-- **validate.sh**: Validates your installation and tests GPU/CPU computation
-- **generate-skill.sh**: Generates Claude Code skill with environment information
-- **README.md**: General setup guide (this file)
-- **UPDATE.md**: Comprehensive guide for checking versions and updating packages
-- **HARDWARE.md**: Detailed machine-specific guides for all your systems
-- **STRIX_HALO.md**: Quick reference for Strix Halo (gfx1151) setup
+- **setup.sh**: Main entry point - creates new ML projects
+- **setup-universal.sh**: Core setup logic (auto-detects hardware)
+- **validate.sh**: Validates installation and tests GPU/CPU
+- **generate-skill.sh**: Creates Claude Code skill
+- **README.md**: This guide
+- **HARDWARE.md**: Detailed hardware-specific guides
+- **STRIX_HALO.md**: Strix Halo (gfx1151) quick reference
+- **UPDATE.md**: Updating and maintenance guide
+- **CLAUDE_WEBHOOK.md**: CI/CD setup guide
 
 ## Supported Hardware
 
@@ -288,12 +326,23 @@ Contributions are welcome! This project uses Claude Code for automated code revi
 ### How to Contribute
 
 1. Fork the repository
-2. Create a feature branch: `git checkout -b feature/amazing-feature`
-3. Make your changes
-4. Run validation: `./validate.sh`
-5. Commit your changes: `git commit -m "Add amazing feature"`
-6. Push to the branch: `git push origin feature/amazing-feature`
-7. Open a Pull Request
+2. Clone your fork: `git clone https://github.com/YOUR_USERNAME/ml-env-setup.git`
+3. Create a test project: `./setup.sh test-project`
+4. Test your changes in the test project
+5. Create a feature branch: `git checkout -b feature/amazing-feature`
+6. Make your changes to the setup scripts
+7. Test again: `./setup.sh test-project-2`
+8. Commit your changes: `git commit -m "Add amazing feature"`
+9. Push to your fork: `git push origin feature/amazing-feature`
+10. Open a Pull Request
+
+**Testing Checklist**:
+- [ ] Runs on your hardware type (NVIDIA/AMD/CPU)
+- [ ] Creates project directory correctly
+- [ ] Installs PyTorch successfully
+- [ ] Generates Claude skill
+- [ ] Validation passes (`./validate.sh` in created project)
+- [ ] Documentation is updated if needed
 
 ### Claude Code Reviews
 
