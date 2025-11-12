@@ -34,7 +34,6 @@ curl -LsSf https://astral.sh/uv/install.sh | sh
 
 ```bash
 git clone https://github.com/ianbarber/ml-env-setup.git
-cd ml-env-setup
 ```
 
 ### Create Your ML Project
@@ -42,14 +41,15 @@ cd ml-env-setup
 **One simple command:**
 
 ```bash
-# Create a new project in current directory
-./setup.sh
+# Create a project (as sibling directory)
+ml-env-setup/setup.sh my-ml-project
 
-# Or create a new project with a specific name
-./setup.sh my-ml-project
+# Or use absolute path
+ml-env-setup/setup.sh ~/projects/my-awesome-project
 
-# Or create at a specific path
-./setup.sh /path/to/my-project
+# Or navigate to where you want projects
+cd ~/projects
+../ml-env-setup/setup.sh my-project
 ```
 
 **That's it!** The script will:
@@ -72,12 +72,11 @@ python your_script.py
 ### Example: Complete Workflow
 
 ```bash
-# Clone the setup repo
+# Clone the setup repo once
 git clone https://github.com/ianbarber/ml-env-setup.git
 
-# Create your project
-cd ml-env-setup
-./setup.sh my-awesome-ai-project
+# Create your first project (sibling to ml-env-setup)
+ml-env-setup/setup.sh my-awesome-ai-project
 
 # Start working
 cd my-awesome-ai-project
@@ -88,6 +87,10 @@ source ml-env/bin/activate
 
 # Start coding!
 python train_model.py
+
+# Create another project anytime
+cd ..
+ml-env-setup/setup.sh another-project
 ```
 
 ## How It Works
@@ -337,7 +340,7 @@ See [CLAUDE_WEBHOOK.md](CLAUDE_WEBHOOK.md) for setup details.
 - **Documentation**: See the guides in this repo:
   - [TROUBLESHOOTING.md](TROUBLESHOOTING.md) - Common issues and hardware-specific setup
   - [UPDATE.md](UPDATE.md) - Updating and maintenance
-  - [CLAUDE_WEBHOOK.md](CLAUDE_WEBHOOK.md) - CI/CD setup
+  - [CLAUDE_WEBHOOK.md](CLAUDE_WEBHOOK.md) - CI/CD setupits 
 
 ## License
 
