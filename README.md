@@ -164,8 +164,6 @@ your-project/
   - PyTorch 2.9.0 with CUDA 12.8 (stable)
 - **RTX 30 series** (3090, 3080, etc.) - Ampere (sm_86)
   - PyTorch 2.9.0 with CUDA 12.8 (stable)
-- **B100, GB200, B200** - Blackwell data center (sm_100)
-  - Limited support, may need specific builds
 
 ### AMD GPUs
 - **Strix Halo** (Ryzen AI Max, gfx1151)
@@ -240,14 +238,6 @@ See [UPDATE.md](UPDATE.md) for detailed instructions on:
 - ROCm drivers (6.2 or newer)
 - ROCm-compatible AMD GPU
 
-## Notes
-
-- The environment uses **Python 3.14** (preview support in PyTorch 2.9.0)
-- For production, consider Python 3.11 or 3.12 for more mature support
-- The universal script automatically detects your hardware and chooses the best configuration
-- Each project can have its own isolated environment
-- The setup uses uv for faster package installation compared to pip
-
 ## Troubleshooting
 
 ### CUDA not available after installation (NVIDIA)
@@ -321,19 +311,6 @@ If uv cannot find Python 3.14:
 
 Contributions are welcome! This project uses Claude Code for automated code reviews.
 
-### How to Contribute
-
-1. Fork the repository
-2. Clone your fork: `git clone https://github.com/YOUR_USERNAME/ml-env-setup.git`
-3. Create a test project: `./setup.sh test-project`
-4. Test your changes in the test project
-5. Create a feature branch: `git checkout -b feature/amazing-feature`
-6. Make your changes to the setup scripts
-7. Test again: `./setup.sh test-project-2`
-8. Commit your changes: `git commit -m "Add amazing feature"`
-9. Push to your fork: `git push origin feature/amazing-feature`
-10. Open a Pull Request
-
 **Testing Checklist**:
 - [ ] Runs on your hardware type (NVIDIA/AMD/CPU)
 - [ ] Creates project directory correctly
@@ -361,15 +338,6 @@ See [CLAUDE_WEBHOOK.md](CLAUDE_WEBHOOK.md) for setup details.
   - [TROUBLESHOOTING.md](TROUBLESHOOTING.md) - Common issues and hardware-specific setup
   - [UPDATE.md](UPDATE.md) - Updating and maintenance
   - [CLAUDE_WEBHOOK.md](CLAUDE_WEBHOOK.md) - CI/CD setup
-
-## Credits
-
-Created with assistance from Claude Code.
-
-Special thanks to:
-- AMD ROCm team and community for Strix Halo support
-- @scottt and @jammm for gfx1151 PyTorch builds
-- uv team for fast Python package management
 
 ## License
 
