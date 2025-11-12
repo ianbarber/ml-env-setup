@@ -140,8 +140,7 @@ your-project/
 ├── generate-skill.sh        # Skill generator (for reference)
 ├── .gitignore               # Ignores ml-env, logs, etc.
 ├── README.md                # Documentation
-├── HARDWARE.md              # Hardware-specific guides
-├── STRIX_HALO.md            # Strix Halo reference (if applicable)
+├── TROUBLESHOOTING.md       # Common issues and solutions
 └── UPDATE.md                # Maintenance and updating guide
 ```
 
@@ -152,27 +151,26 @@ your-project/
 - **validate.sh**: Validates installation and tests GPU/CPU
 - **generate-skill.sh**: Creates Claude Code skill
 - **README.md**: This guide
-- **HARDWARE.md**: Detailed hardware-specific guides
-- **STRIX_HALO.md**: Strix Halo (gfx1151) quick reference
+- **TROUBLESHOOTING.md**: Common issues, solutions, and hardware-specific notes
 - **UPDATE.md**: Updating and maintenance guide
 - **CLAUDE_WEBHOOK.md**: CI/CD setup guide
 
 ## Supported Hardware
 
 ### NVIDIA GPUs
-- **RTX 50 series** (5090, 5080, etc.) - Blackwell (sm_120)
+- **RTX 50 series** (5090, 5080, etc.) - Blackwell consumer (sm_120+)
   - PyTorch 2.9.0 with CUDA 13.0 (experimental) or nightly builds
 - **RTX 40 series** (4090, 4080, 4060, etc.) - Ada Lovelace (sm_89)
   - PyTorch 2.9.0 with CUDA 12.8 (stable)
 - **RTX 30 series** (3090, 3080, etc.) - Ampere (sm_86)
   - PyTorch 2.9.0 with CUDA 12.8 (stable)
-- **GB200, B200** - Blackwell data center GPUs (sm_120)
-  - PyTorch nightly builds recommended
+- **B100, GB200, B200** - Blackwell data center (sm_100)
+  - Limited support, may need specific builds
 
 ### AMD GPUs
 - **Strix Halo** (Ryzen AI Max, gfx1151)
   - ROCm 6.4.4+ nightlies (recommended) or ROCm 7.9 stable
-  - ⚠️ Requires special gfx1151 builds - see [STRIX_HALO.md](STRIX_HALO.md)
+  - ⚠️ Requires special gfx1151 builds - see [TROUBLESHOOTING.md](TROUBLESHOOTING.md#strix-halo-gfx1151-specific-setup)
 - **RDNA 3** (RX 7000 series)
   - ROCm 6.2
 - **RDNA 2** (RX 6000 series)
@@ -300,7 +298,7 @@ rm -rf ml-env
 **Solution**:
 1. Verify ROCm installation: `rocm-smi` or `rocminfo`
 2. Check AMD GPU compatibility with ROCm
-3. **For Strix Halo (gfx1151)**: See [STRIX_HALO.md](STRIX_HALO.md) for detailed troubleshooting
+3. **For Strix Halo (gfx1151)**: See [TROUBLESHOOTING.md](TROUBLESHOOTING.md#strix-halo-gfx1151-specific-setup) for detailed instructions
    - Must use special gfx1151 builds (official PyTorch doesn't work!)
    - Requires `render` and `video` group membership
    - ROCm 6.4.4+ nightlies recommended
@@ -360,8 +358,7 @@ See [CLAUDE_WEBHOOK.md](CLAUDE_WEBHOOK.md) for setup details.
 - **Issues**: Open an issue on GitHub
 - **Discussions**: Use GitHub Discussions for questions
 - **Documentation**: See the guides in this repo:
-  - [HARDWARE.md](HARDWARE.md) - Hardware-specific setup
-  - [STRIX_HALO.md](STRIX_HALO.md) - Strix Halo guide
+  - [TROUBLESHOOTING.md](TROUBLESHOOTING.md) - Common issues and hardware-specific setup
   - [UPDATE.md](UPDATE.md) - Updating and maintenance
   - [CLAUDE_WEBHOOK.md](CLAUDE_WEBHOOK.md) - CI/CD setup
 

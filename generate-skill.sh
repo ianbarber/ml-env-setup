@@ -167,8 +167,7 @@ watch -n 1 rocm-smi
 ## Hardware-Specific Notes
 
 See the ml-env-setup directory for detailed documentation:
-- `HARDWARE.md` - Hardware-specific guides
-- `STRIX_HALO.md` - For AMD Strix Halo (gfx1151)
+- `TROUBLESHOOTING.md` - Common issues and hardware-specific guides (including Strix Halo)
 - `README.md` - General setup information
 - `UPDATE.md` - Updating packages
 

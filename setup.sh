@@ -116,8 +116,7 @@ cp "$SCRIPT_DIR/generate-skill.sh" "$PROJECT_PATH/"
 # Copy documentation
 echo -e "${BLUE}Copying documentation...${NC}"
 cp "$SCRIPT_DIR/README.md" "$PROJECT_PATH/"
-cp "$SCRIPT_DIR/HARDWARE.md" "$PROJECT_PATH/"
-cp "$SCRIPT_DIR/STRIX_HALO.md" "$PROJECT_PATH/"
+cp "$SCRIPT_DIR/TROUBLESHOOTING.md" "$PROJECT_PATH/"
 cp "$SCRIPT_DIR/UPDATE.md" "$PROJECT_PATH/"
 
 # Create .gitignore if it doesn't exist
