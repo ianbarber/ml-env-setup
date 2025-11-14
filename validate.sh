@@ -24,8 +24,12 @@ fi
 
 echo -e "${GREEN}✓ Environment directory found${NC}"
 
-# Activate environment
-source "$ENV_PATH/bin/activate"
+# Activate environment (use safe wrapper if available for conda users)
+if [ -f "$ENV_PATH/activate-safe.sh" ]; then
+    source "$ENV_PATH/activate-safe.sh"
+else
+    source "$ENV_PATH/bin/activate"
+fi
 
 echo ""
 echo -e "${BLUE}1. Python Version${NC}"

@@ -69,7 +69,7 @@ detect_gpu() {
 # Get NVIDIA GPU details
 get_nvidia_info() {
     if ! command -v nvidia-smi &> /dev/null; then
-        echo "none" "0" "0"
+        echo "none|0|0"
         return
     fi
 
@@ -80,7 +80,8 @@ get_nvidia_info() {
     COMPUTE_MAJOR=$(echo "$COMPUTE_CAP" | cut -d. -f1)
     COMPUTE_MINOR=$(echo "$COMPUTE_CAP" | cut -d. -f2)
 
-    echo "$GPU_NAME" "$COMPUTE_MAJOR" "$COMPUTE_MINOR"
+    # Return using pipe delimiter to handle spaces in GPU name
+    echo "${GPU_NAME}|${COMPUTE_MAJOR}|${COMPUTE_MINOR}"
 }
 
 # Get AMD GPU details
@@ -150,17 +151,17 @@ determine_pytorch_install() {
             # Determine CUDA version based on compute capability
             local sm_version="${compute_major}${compute_minor}"
 
-            echo -e "${YELLOW}Detected NVIDIA GPU with compute capability: sm_${sm_version}${NC}"
+            echo -e "${YELLOW}Detected NVIDIA GPU with compute capability: sm_${sm_version}${NC}" >&2
 
             if [ "$compute_major" -ge 12 ]; then
                 # Blackwell (RTX 5090, GB200) - sm_120+
-                echo -e "${YELLOW}⚠️  Blackwell architecture detected (sm_120+)${NC}"
-                echo -e "${YELLOW}   PyTorch 2.9.0 has experimental support for this GPU${NC}"
-                echo ""
-                echo "Choose installation option:"
-                echo "  1) PyTorch 2.9.0 with CUDA 13.0 (experimental, may have issues)"
-                echo "  2) PyTorch nightly (recommended for cutting-edge GPUs)"
-                echo "  3) PyTorch 2.9.0 with CUDA 12.8 (stable, may fall back to PTX)"
+                echo -e "${YELLOW}⚠️  Blackwell architecture detected (sm_120+)${NC}" >&2
+                echo -e "${YELLOW}   PyTorch 2.9.0 has experimental support for this GPU${NC}" >&2
+                echo "" >&2
+                echo "Choose installation option:" >&2
+                echo "  1) PyTorch 2.9.0 with CUDA 13.0 (experimental, may have issues)" >&2
+                echo "  2) PyTorch nightly (recommended for cutting-edge GPUs)" >&2
+                echo "  3) PyTorch 2.9.0 with CUDA 12.8 (stable, may fall back to PTX)" >&2
                 read -p "Choice [1-3]: " choice
 
                 case $choice in
@@ -172,23 +173,23 @@ determine_pytorch_install() {
 
             elif [ "$compute_major" -ge 9 ]; then
                 # Ada Lovelace (RTX 4060) - sm_89
-                echo -e "${GREEN}Ada Lovelace architecture detected - using CUDA 12.8${NC}"
+                echo -e "${GREEN}Ada Lovelace architecture detected - using CUDA 12.8${NC}" >&2
                 INDEX_URL="https://download.pytorch.org/whl/cu128"
 
             elif [ "$compute_major" -ge 8 ]; then
                 # Ampere (RTX 3090) - sm_86
-                echo -e "${GREEN}Ampere architecture detected - using CUDA 12.8${NC}"
+                echo -e "${GREEN}Ampere architecture detected - using CUDA 12.8${NC}" >&2
                 INDEX_URL="https://download.pytorch.org/whl/cu128"
 
             else
                 # Older architectures
-                echo -e "${YELLOW}Older GPU architecture detected - using CUDA 12.8${NC}"
+                echo -e "${YELLOW}Older GPU architecture detected - using CUDA 12.8${NC}" >&2
                 INDEX_URL="https://download.pytorch.org/whl/cu128"
             fi
 
             if [ "$platform" == "wsl" ]; then
-                echo -e "${BLUE}ℹ️  WSL2 detected - using Windows NVIDIA driver${NC}"
-                echo -e "${BLUE}   Do NOT install Linux NVIDIA drivers in WSL2!${NC}"
+                echo -e "${BLUE}ℹ️  WSL2 detected - using Windows NVIDIA driver${NC}" >&2
+                echo -e "${BLUE}   Do NOT install Linux NVIDIA drivers in WSL2!${NC}" >&2
             fi
             ;;
 
@@ -201,73 +202,73 @@ determine_pytorch_install() {
             # Parse AMD GPU info
             read AMD_TYPE GFX_ARCH AMD_NAME <<< "$3"
 
-            echo -e "${YELLOW}AMD GPU detected: $AMD_NAME${NC}"
+            echo -e "${YELLOW}AMD GPU detected: $AMD_NAME${NC}" >&2
             if [ -n "$GFX_ARCH" ]; then
-                echo -e "${YELLOW}Architecture: $GFX_ARCH${NC}"
+                echo -e "${YELLOW}Architecture: $GFX_ARCH${NC}" >&2
             fi
 
             if [ "$AMD_TYPE" == "strix_halo" ]; then
-                echo ""
-                echo -e "${BLUE}╔════════════════════════════════════════════════════════════════╗${NC}"
-                echo -e "${BLUE}║  Strix Halo (gfx1151) Detected                                 ║${NC}"
-                echo -e "${BLUE}╚════════════════════════════════════════════════════════════════╝${NC}"
-                echo ""
-                echo -e "${YELLOW}⚠️  Official PyTorch wheels DO NOT work with gfx1151${NC}"
-                echo -e "${YELLOW}   Must use AMD community nightlies or stable gfx1151 builds${NC}"
-                echo ""
-                echo "Choose ROCm installation option:"
-                echo ""
-                echo "  ${GREEN}1) ROCm 6.4.4+ Nightlies (RECOMMENDED - Stable)${NC}"
-                echo "     Index: https://rocm.nightlies.amd.com/v2/gfx1151/"
-                echo "     Status: Works well, tested by community"
-                echo ""
-                echo "  ${YELLOW}2) ROCm 7.9 Stable gfx1151 Build (NEWEST)${NC}"
-                echo "     Index: https://repo.amd.com/rocm/whl/gfx1151/"
-                echo "     Status: Official stable release for gfx1151"
-                echo ""
-                echo "  ${BLUE}3) ROCm 7.0.2+ Nightlies (EXPERIMENTAL)${NC}"
-                echo "     Index: https://rocm.nightlies.amd.com/v2/gfx1151/"
-                echo "     Status: Latest features, may be unstable"
-                echo ""
-                echo "  ${RED}4) CPU-only (Safe fallback)${NC}"
-                echo "     No GPU acceleration"
-                echo ""
+                echo "" >&2
+                echo -e "${BLUE}╔════════════════════════════════════════════════════════════════╗${NC}" >&2
+                echo -e "${BLUE}║  Strix Halo (gfx1151) Detected                                 ║${NC}" >&2
+                echo -e "${BLUE}╚════════════════════════════════════════════════════════════════╝${NC}" >&2
+                echo "" >&2
+                echo -e "${YELLOW}⚠️  Official PyTorch wheels DO NOT work with gfx1151${NC}" >&2
+                echo -e "${YELLOW}   Must use AMD community nightlies or stable gfx1151 builds${NC}" >&2
+                echo "" >&2
+                echo "Choose ROCm installation option:" >&2
+                echo "" >&2
+                echo "  ${GREEN}1) ROCm 6.4.4+ Nightlies (RECOMMENDED - Stable)${NC}" >&2
+                echo "     Index: https://rocm.nightlies.amd.com/v2/gfx1151/" >&2
+                echo "     Status: Works well, tested by community" >&2
+                echo "" >&2
+                echo "  ${YELLOW}2) ROCm 7.9 Stable gfx1151 Build (NEWEST)${NC}" >&2
+                echo "     Index: https://repo.amd.com/rocm/whl/gfx1151/" >&2
+                echo "     Status: Official stable release for gfx1151" >&2
+                echo "" >&2
+                echo "  ${BLUE}3) ROCm 7.0.2+ Nightlies (EXPERIMENTAL)${NC}" >&2
+                echo "     Index: https://rocm.nightlies.amd.com/v2/gfx1151/" >&2
+                echo "     Status: Latest features, may be unstable" >&2
+                echo "" >&2
+                echo "  ${RED}4) CPU-only (Safe fallback)${NC}" >&2
+                echo "     No GPU acceleration" >&2
+                echo "" >&2
                 read -p "Choice [1-4]: " choice
 
                 case $choice in
                     1)
-                        echo -e "${GREEN}Installing PyTorch with ROCm 6.4.4+ nightlies${NC}"
+                        echo -e "${GREEN}Installing PyTorch with ROCm 6.4.4+ nightlies${NC}" >&2
                         PYTORCH_VERSION="--pre torch torchvision torchaudio"
                         INDEX_URL="https://rocm.nightlies.amd.com/v2/gfx1151/"
                         ;;
                     2)
-                        echo -e "${GREEN}Installing PyTorch with ROCm 7.9 stable gfx1151${NC}"
+                        echo -e "${GREEN}Installing PyTorch with ROCm 7.9 stable gfx1151${NC}" >&2
                         PYTORCH_VERSION="torch torchvision torchaudio"
                         INDEX_URL="https://repo.amd.com/rocm/whl/gfx1151/"
                         ;;
                     3)
-                        echo -e "${YELLOW}Installing PyTorch with ROCm 7.0.2+ nightlies (experimental)${NC}"
+                        echo -e "${YELLOW}Installing PyTorch with ROCm 7.0.2+ nightlies (experimental)${NC}" >&2
                         PYTORCH_VERSION="--pre torch torchvision torchaudio"
                         INDEX_URL="https://rocm.nightlies.amd.com/v2/gfx1151/"
                         ;;
                     *)
-                        echo -e "${BLUE}Installing CPU-only PyTorch${NC}"
+                        echo -e "${BLUE}Installing CPU-only PyTorch${NC}" >&2
                         PYTORCH_VERSION="torch torchvision torchaudio"
                         INDEX_URL="https://download.pytorch.org/whl/cpu"
                         ;;
                 esac
 
-                echo ""
-                echo -e "${BLUE}ℹ️  Note: For large models (30B+), configure GTT memory${NC}"
-                echo -e "${BLUE}   See: https://github.com/ianbarber/strix-halo-skills${NC}"
+                echo "" >&2
+                echo -e "${BLUE}ℹ️  Note: For large models (30B+), configure GTT memory${NC}" >&2
+                echo -e "${BLUE}   See: https://github.com/ianbarber/strix-halo-skills${NC}" >&2
 
             else
                 # Other AMD GPUs (RDNA 2/3)
-                echo -e "${YELLOW}Standard AMD GPU detected${NC}"
-                echo ""
-                echo "Choose installation option:"
-                echo "  1) PyTorch with ROCm 6.2 (stable)"
-                echo "  2) CPU-only PyTorch"
+                echo -e "${YELLOW}Standard AMD GPU detected${NC}" >&2
+                echo "" >&2
+                echo "Choose installation option:" >&2
+                echo "  1) PyTorch with ROCm 6.2 (stable)" >&2
+                echo "  2) CPU-only PyTorch" >&2
                 read -p "Choice [1-2]: " choice
 
                 case $choice in
@@ -280,13 +281,14 @@ determine_pytorch_install() {
             ;;
 
         cpu)
-            echo -e "${BLUE}No GPU detected - installing CPU-only PyTorch${NC}"
+            echo -e "${BLUE}No GPU detected - installing CPU-only PyTorch${NC}" >&2
             PYTORCH_VERSION="torch torchvision torchaudio"
             INDEX_URL="https://download.pytorch.org/whl/cpu"
             ;;
     esac
 
-    echo "$PYTORCH_VERSION" "$INDEX_URL"
+    # Return using pipe delimiter to handle spaces in package names
+    echo "${PYTORCH_VERSION}|${INDEX_URL}"
 }
 
 # Main detection
@@ -301,7 +303,7 @@ echo -e "Platform: ${GREEN}$PLATFORM${NC}"
 echo -e "GPU Type: ${GREEN}$GPU_TYPE${NC}"
 
 if [ "$GPU_TYPE" == "nvidia" ]; then
-    read GPU_NAME COMPUTE_MAJOR COMPUTE_MINOR <<< $(get_nvidia_info)
+    IFS='|' read -r GPU_NAME COMPUTE_MAJOR COMPUTE_MINOR <<< "$(get_nvidia_info)"
     echo -e "GPU: ${GREEN}$GPU_NAME${NC}"
     echo -e "Compute Capability: ${GREEN}$COMPUTE_MAJOR.$COMPUTE_MINOR${NC}"
 
@@ -361,12 +363,51 @@ fi
 
 echo -e "${GREEN}✓ Virtual environment created${NC}"
 
+# Create conda-safe activation wrapper
+cat > "$ENV_PATH/activate-safe.sh" << 'ACTIVATE_WRAPPER'
+#!/bin/bash
+# Conda-safe activation wrapper
+# This script ensures conda doesn't interfere with the virtual environment
+
+# Store original conda settings
+if [ -n "$CONDA_DEFAULT_ENV" ]; then
+    echo "Note: Conda environment '$CONDA_DEFAULT_ENV' will be overridden"
+fi
+
+# Get the directory of this script
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+# Clear conda environment variables that interfere
+unset CONDA_DEFAULT_ENV
+unset CONDA_PREFIX
+unset CONDA_PYTHON_EXE
+unset CONDA_PROMPT_MODIFIER
+
+# Source the standard activate script
+source "$SCRIPT_DIR/bin/activate"
+
+# Force the venv bin directory to be first in PATH
+# This ensures venv Python takes precedence over conda
+export PATH="$SCRIPT_DIR/bin:$PATH"
+
+# Verify we're using the right Python
+PYTHON_VERSION=$(python --version 2>&1 | cut -d' ' -f2)
+PYTHON_PATH=$(which python)
+
+echo "✓ ML environment activated"
+echo "  Python: $PYTHON_VERSION"
+echo "  Location: $PYTHON_PATH"
+ACTIVATE_WRAPPER
+
+chmod +x "$ENV_PATH/activate-safe.sh"
+echo -e "${BLUE}ℹ️  Created conda-safe activation wrapper${NC}"
+
 # Determine PyTorch installation
 echo ""
 if [ "$GPU_TYPE" == "amd" ]; then
-    read PYTORCH_CMD INDEX_URL <<< $(determine_pytorch_install "$GPU_TYPE" "$COMPUTE_MAJOR" "$AMD_INFO" "$PLATFORM")
+    IFS='|' read -r PYTORCH_CMD INDEX_URL <<< "$(determine_pytorch_install "$GPU_TYPE" "$COMPUTE_MAJOR" "$AMD_INFO" "$PLATFORM")"
 else
-    read PYTORCH_CMD INDEX_URL <<< $(determine_pytorch_install "$GPU_TYPE" "$COMPUTE_MAJOR" "$COMPUTE_MINOR" "$PLATFORM")
+    IFS='|' read -r PYTORCH_CMD INDEX_URL <<< "$(determine_pytorch_install "$GPU_TYPE" "$COMPUTE_MAJOR" "$COMPUTE_MINOR" "$PLATFORM")"
 fi
 
 echo ""
@@ -374,15 +415,15 @@ echo -e "${BLUE}Installing PyTorch...${NC}"
 echo "Command: uv pip install $PYTORCH_CMD"
 if [ -n "$INDEX_URL" ]; then
     echo "Index URL: $INDEX_URL"
-    UV_PROJECT_ENVIRONMENT="$ENV_PATH" uv pip install $PYTORCH_CMD --index-url "$INDEX_URL"
+    uv pip install --python "$ENV_PATH/bin/python" $PYTORCH_CMD --index-url "$INDEX_URL"
 else
-    UV_PROJECT_ENVIRONMENT="$ENV_PATH" uv pip install $PYTORCH_CMD
+    uv pip install --python "$ENV_PATH/bin/python" $PYTORCH_CMD
 fi
 
 echo ""
 echo -e "${BLUE}Installing additional ML libraries...${NC}"
 
-UV_PROJECT_ENVIRONMENT="$ENV_PATH" uv pip install \
+uv pip install --python "$ENV_PATH/bin/python" \
     "numpy>=1.26.0,<2.0.0" \
     "pandas>=2.0.0" \
     "matplotlib>=3.8.0" \
@@ -394,7 +435,7 @@ UV_PROJECT_ENVIRONMENT="$ENV_PATH" uv pip install \
 
 echo ""
 echo -e "${BLUE}Saving installed packages...${NC}"
-UV_PROJECT_ENVIRONMENT="$ENV_PATH" uv pip freeze > "$ENV_PATH/requirements-installed.txt"
+uv pip freeze --python "$ENV_PATH/bin/python" > "$ENV_PATH/requirements-installed.txt"
 echo -e "${GREEN}✓ Package list saved to $ENV_PATH/requirements-installed.txt${NC}"
 
 echo ""
@@ -406,8 +447,9 @@ echo -e "${GREEN}=== Installation Complete ===${NC}"
 echo ""
 echo -e "Environment location: ${BLUE}$ENV_PATH${NC}"
 echo ""
-echo "To activate this environment, run:"
-echo -e "  ${BLUE}source $ENV_PATH/bin/activate${NC}"
+echo "To activate this environment:"
+echo -e "  ${GREEN}If you use conda:${NC} ${BLUE}source $ENV_PATH/activate-safe.sh${NC}"
+echo -e "  ${GREEN}Otherwise:${NC}      ${BLUE}source $ENV_PATH/bin/activate${NC}"
 echo ""
 echo "To verify installation, run:"
 echo -e "  ${BLUE}$SCRIPT_DIR/validate.sh${NC}"
