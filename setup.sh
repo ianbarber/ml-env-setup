@@ -111,7 +111,6 @@ echo ""
 echo -e "${BLUE}Copying setup scripts...${NC}"
 cp "$SCRIPT_DIR/setup-universal.sh" "$PROJECT_PATH/"
 cp "$SCRIPT_DIR/validate.sh" "$PROJECT_PATH/"
-cp "$SCRIPT_DIR/generate-skill.sh" "$PROJECT_PATH/"
 
 # Copy documentation
 echo -e "${BLUE}Copying documentation...${NC}"
@@ -207,13 +206,11 @@ echo "  4. Start coding!"
 echo -e "     ${BLUE}python your_script.py${NC}"
 echo ""
 
-# Show Claude skill info
-if [ -d "$PROJECT_PATH/.claude/skills/ml-env" ]; then
-    echo -e "${CYAN}🤖 Claude Code Integration${NC}"
-    echo "   A skill has been created at .claude/skills/ml-env/"
-    echo "   Claude will automatically help with environment questions"
-    echo ""
-fi
+# Note about global Claude skill
+echo -e "${CYAN}🤖 Claude Code Integration${NC}"
+echo "   A global ML environment skill is available at ~/.claude/skills/ml-env/"
+echo "   It provides setup guidance, troubleshooting, and best practices"
+echo ""
 
 # Offer to initialize git
 if [ ! -d "$PROJECT_PATH/.git" ] && command -v git &> /dev/null; then

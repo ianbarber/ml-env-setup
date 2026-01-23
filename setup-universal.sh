@@ -439,10 +439,6 @@ uv pip freeze --python "$ENV_PATH/bin/python" > "$ENV_PATH/requirements-installe
 echo -e "${GREEN}✓ Package list saved to $ENV_PATH/requirements-installed.txt${NC}"
 
 echo ""
-echo -e "${BLUE}Generating ML environment skill for this project...${NC}"
-"$SCRIPT_DIR/generate-skill.sh" "$SCRIPT_DIR"
-
-echo ""
 echo -e "${GREEN}=== Installation Complete ===${NC}"
 echo ""
 echo -e "Environment location: ${BLUE}$ENV_PATH${NC}"

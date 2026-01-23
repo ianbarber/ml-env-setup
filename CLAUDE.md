@@ -26,10 +26,9 @@ The project creates **isolated project environments** outside the setup reposito
      - NVIDIA: Detects compute capability (sm_86, sm_89, sm_120+) and chooses CUDA version (setup-universal.sh:69-84, 148-193)
      - AMD: Detects architecture (gfx1151 for Strix Halo) with special handling (setup-universal.sh:86-135, 195-280)
      - CPU: Fallback for systems without GPU (setup-universal.sh:282-286)
-   - Creates Python 3.14 virtual environment using `uv`
+   - Creates Python 3.12/3.13 virtual environment using `uv`
    - Installs PyTorch with hardware-appropriate index URLs
    - Installs ML libraries: numpy, pandas, scikit-learn, jupyter, etc.
-   - Generates Claude Code skill (setup-universal.sh:401-402)
 
 3. **validate.sh** (Testing - ~188 lines)
    - Verifies environment installation
@@ -37,12 +36,14 @@ The project creates **isolated project environments** outside the setup reposito
    - Reports hardware details and performance metrics
    - Provides diagnostic information for troubleshooting
 
-### Supporting Scripts
+### Claude Code Integration
 
-- **generate-skill.sh**: Creates `.claude/skills/ml-env/SKILL.md` in target projects
-  - Auto-activated skill for environment questions
-  - Contains activation commands, package info, troubleshooting
-  - Embeds actual environment path from setup
+A comprehensive global ML environment skill is installed at `~/.claude/skills/ml-env/SKILL.md`:
+- Provides setup guidance and troubleshooting for all ML projects
+- Hardware-specific instructions (NVIDIA, AMD, Strix Halo, CPU)
+- Best practices for PyTorch development
+- Package management and environment activation guidance
+- Eliminates redundant per-project skills
 
 ## Common Development Tasks
 
@@ -84,11 +85,12 @@ PyTorch installation URLs are in setup-universal.sh:138-290:
 
 ### Modifying the Claude Skill
 
-The skill template is in generate-skill.sh:24-210. Key sections:
-- Environment activation commands (dynamically embedded path)
-- Common ML tasks and code examples
+The global ML skill is at `~/.claude/skills/ml-env/SKILL.md`. Key sections:
+- Environment activation and setup instructions
+- Hardware-specific guidance (NVIDIA, AMD, Strix Halo, CPU)
+- Common ML workflows and best practices
 - Troubleshooting patterns
-- References to project documentation
+- References to setup repository and documentation
 
 ## Key Design Patterns
 
@@ -123,11 +125,10 @@ The scripts prompt users at key decision points:
 
 **Most complex hardware path** - requires special attention:
 - Official PyTorch wheels don't work at all
-- Must use AMD community nightlies or stable gfx1151 builds
-- Three different repo options with trade-offs (setup-universal.sh:218-258)
+- Must use AMD community nightlies from `https://rocm.nightlies.amd.com/v2/gfx1151/` (ROCm 6.4.4+ or 7.x)
 - Requires user in `render` and `video` groups (checked at setup-universal.sh:111-135)
 - GTT memory configuration for large models (documented but not automated)
-- See TROUBLESHOOTING.md:262-380 for comprehensive guide
+- See TROUBLESHOOTING.md and [strix-halo-skills](https://github.com/ianbarber/strix-halo-skills) for comprehensive guide
 
 ### WSL2
 

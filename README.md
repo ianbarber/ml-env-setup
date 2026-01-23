@@ -57,7 +57,6 @@ cd ~/projects
 - ✅ Detect your hardware (NVIDIA/AMD/CPU)
 - ✅ Install PyTorch with the right backend
 - ✅ Set up ML libraries (numpy, pandas, scikit-learn, etc.)
-- ✅ Create a Claude Code skill for environment help
 - ✅ Add a .gitignore
 - ✅ Validate the installation
 
@@ -135,12 +134,8 @@ After running `./setup.sh`, your project will have:
 ```
 your-project/
 ├── ml-env/                  # Python virtual environment with PyTorch
-├── .claude/
-│   └── skills/
-│       └── ml-env/          # Claude Code skill (auto-activated)
 ├── setup-universal.sh       # The setup script (for reference)
 ├── validate.sh              # Test your installation
-├── generate-skill.sh        # Skill generator (for reference)
 ├── .gitignore               # Ignores ml-env, logs, etc.
 ├── README.md                # Documentation
 ├── TROUBLESHOOTING.md       # Common issues and solutions
@@ -152,7 +147,6 @@ your-project/
 - **setup.sh**: Main entry point - creates new ML projects
 - **setup-universal.sh**: Core setup logic (auto-detects hardware)
 - **validate.sh**: Validates installation and tests GPU/CPU
-- **generate-skill.sh**: Creates Claude Code skill
 - **README.md**: This guide
 - **TROUBLESHOOTING.md**: Common issues, solutions, and hardware-specific notes
 - **UPDATE.md**: Updating and maintenance guide
