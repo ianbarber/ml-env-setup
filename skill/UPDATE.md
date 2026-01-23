@@ -4,24 +4,31 @@
 
 ### Check PyTorch and CUDA versions
 
-Activate the environment and run:
+First, activate your project's environment. From your project directory:
 
 ```bash
-source /home/ianbarber/ml-env-setup/ml-env/bin/activate
+source ml-env/bin/activate
+python -c 'import torch; print(f"PyTorch: {torch.__version__}"); print(f"CUDA: {torch.version.cuda}")'
+```
+
+Or if using conda and the conda-safe wrapper:
+
+```bash
+source ml-env/activate-safe.sh
 python -c 'import torch; print(f"PyTorch: {torch.__version__}"); print(f"CUDA: {torch.version.cuda}")'
 ```
 
 ### Check all installed packages
 
 ```bash
-source /home/ianbarber/ml-env-setup/ml-env/bin/activate
+source ml-env/bin/activate
 uv pip list
 ```
 
 ### Check for outdated packages
 
 ```bash
-source /home/ianbarber/ml-env-setup/ml-env/bin/activate
+source ml-env/bin/activate
 uv pip list --outdated
 ```
 
@@ -34,21 +41,35 @@ Visit: https://pytorch.org/get-started/locally/
 Or check available versions:
 
 ```bash
-uv pip index versions torch --index-url https://download.pytorch.org/whl/cu130
+uv pip index versions torch --index-url https://download.pytorch.org/whl/cu128
 ```
 
-### Update to a specific version
+### Update to a specific version (NVIDIA CUDA 12.8)
 
 ```bash
-source /home/ianbarber/ml-env-setup/ml-env/bin/activate
-uv pip install torch==2.X.Y torchvision torchaudio --index-url https://download.pytorch.org/whl/cu130 --upgrade
+source ml-env/bin/activate
+uv pip install torch==2.X.Y torchvision torchaudio --index-url https://download.pytorch.org/whl/cu128 --upgrade
 ```
 
-### Update to the latest compatible version
+### Update to the latest compatible version (NVIDIA)
 
 ```bash
-source /home/ianbarber/ml-env-setup/ml-env/bin/activate
-uv pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu130 --upgrade
+source ml-env/bin/activate
+uv pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu128 --upgrade
+```
+
+### Update to specific ROCm version (AMD)
+
+```bash
+source ml-env/bin/activate
+uv pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/rocm6.2 --upgrade
+```
+
+### Update for Strix Halo (AMD gfx1151)
+
+```bash
+source ml-env/bin/activate
+uv pip install --index-url https://rocm.nightlies.amd.com/v2/gfx1151/ --pre torch torchvision torchaudio --upgrade
 ```
 
 ## Updating Other Packages
@@ -56,36 +77,18 @@ uv pip install torch torchvision torchaudio --index-url https://download.pytorch
 ### Update a specific package
 
 ```bash
-source /home/ianbarber/ml-env-setup/ml-env/bin/activate
+source ml-env/bin/activate
 uv pip install --upgrade package-name
 ```
 
 ### Update all packages (use with caution)
 
 ```bash
-source /home/ianbarber/ml-env-setup/ml-env/bin/activate
+source ml-env/bin/activate
 uv pip list --outdated | tail -n +3 | awk '{print $1}' | xargs -n1 uv pip install --upgrade
 ```
 
 Note: This may break compatibility. Consider testing in a separate environment first.
-
-## Updating the Setup Script
-
-When you want to update the setup script for new projects:
-
-1. Edit `/home/ianbarber/ml-env-setup/setup.sh`
-2. Update version numbers in the script
-3. Test the script in a temporary directory:
-
-```bash
-cd /tmp
-mkdir test-ml-setup
-cp /home/ianbarber/ml-env-setup/setup.sh test-ml-setup/
-cd test-ml-setup
-./setup.sh
-```
-
-4. If successful, your updated script is ready to copy to new projects
 
 ## Checking NVIDIA Driver and CUDA Toolkit
 
@@ -104,7 +107,7 @@ nvcc --version
 ### Verify GPU compute capability
 
 ```bash
-source /home/ianbarber/ml-env-setup/ml-env/bin/activate
+source ml-env/bin/activate
 python -c 'import torch; print(f"GPU Compute Capability: {torch.cuda.get_device_capability(0)}")'
 ```
 
@@ -112,12 +115,17 @@ Expected output for RTX 5090: `(12, 0)` indicating SM120
 
 ## Recreating the Environment from Scratch
 
-If something goes wrong, you can recreate the environment:
+If something goes wrong, you can recreate the environment. From your project directory:
 
 ```bash
-cd /home/ianbarber/ml-env-setup
 rm -rf ml-env
-./setup.sh
+bash ~/.claude/skills/ml-env/scripts/setup-universal.sh
+```
+
+Or ask Claude to help you recreate it:
+
+```
+Help me recreate my ML environment - something isn't working
 ```
 
 ## Exporting Environment Configuration
@@ -125,14 +133,14 @@ rm -rf ml-env
 To create a reproducible environment specification:
 
 ```bash
-source /home/ianbarber/ml-env-setup/ml-env/bin/activate
+source ml-env/bin/activate
 uv pip freeze > requirements.txt
 ```
 
-To recreate from requirements:
+To recreate from requirements in a new environment:
 
 ```bash
-uv venv new-ml-env --python 3.14
+uv venv new-ml-env --python 3.13
 source new-ml-env/bin/activate
 uv pip install -r requirements.txt
 ```

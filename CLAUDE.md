@@ -114,10 +114,12 @@ Keep CLAUDE.md, SKILL.md, and setup-universal.sh in sync:
 ```
 # Current as of 2026-01-23
 PyTorch: 2.10.0
-Python: 3.12, 3.13 (avoid 3.14 - ML package issues)
+Python: 3.13 (default), 3.12, 3.11 (avoid 3.14 - ML package compatibility issues)
 CUDA: 12.8, 13.0
 ROCm: 6.2, 6.4.4+, 7.x
 ```
+
+**Note**: The setup-universal.sh script defaults to Python 3.13. Users can change to 3.12 or 3.11 if needed, but Python 3.14 should be avoided due to ML package compatibility issues.
 
 Update these files when new versions release:
 1. setup-universal.sh - update download URLs and version strings

@@ -4,7 +4,7 @@ set -e
 # Universal ML Environment Setup Script
 # Supports: NVIDIA GPUs (CUDA), AMD GPUs (ROCm), CPU-only, WSL2
 
-PYTHON_VERSION="3.14"
+PYTHON_VERSION="3.13"
 ENV_NAME="ml-env"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ENV_PATH="$SCRIPT_DIR/$ENV_NAME"
@@ -142,8 +142,8 @@ determine_pytorch_install() {
     local compute_minor=$3
     local platform=$4
 
-    # Default to stable PyTorch 2.9.0
-    PYTORCH_VERSION="torch==2.9.0 torchvision torchaudio"
+    # Default to stable PyTorch 2.10.0
+    PYTORCH_VERSION="torch==2.10.0 torchvision==0.25.0 torchaudio==2.10.0"
     INDEX_URL=""
 
     case "$gpu_type" in
@@ -156,12 +156,12 @@ determine_pytorch_install() {
             if [ "$compute_major" -ge 12 ]; then
                 # Blackwell (RTX 5090, GB200) - sm_120+
                 echo -e "${YELLOW}⚠️  Blackwell architecture detected (sm_120+)${NC}" >&2
-                echo -e "${YELLOW}   PyTorch 2.9.0 has experimental support for this GPU${NC}" >&2
+                echo -e "${YELLOW}   PyTorch 2.10.0 has experimental support for this GPU${NC}" >&2
                 echo "" >&2
                 echo "Choose installation option:" >&2
-                echo "  1) PyTorch 2.9.0 with CUDA 13.0 (experimental, may have issues)" >&2
+                echo "  1) PyTorch 2.10.0 with CUDA 13.0 (experimental, may have issues)" >&2
                 echo "  2) PyTorch nightly (recommended for cutting-edge GPUs)" >&2
-                echo "  3) PyTorch 2.9.0 with CUDA 12.8 (stable, may fall back to PTX)" >&2
+                echo "  3) PyTorch 2.10.0 with CUDA 12.8 (stable, may fall back to PTX)" >&2
                 read -p "Choice [1-3]: " choice
 
                 case $choice in

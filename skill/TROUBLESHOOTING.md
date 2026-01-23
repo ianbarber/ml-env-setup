@@ -37,8 +37,8 @@ which uv
 # Check permissions on project directory
 ls -la /path/to/project
 
-# Try with a fresh directory
-./setup.sh /tmp/test-project
+# For a fresh start, ask Claude to create a new test project:
+# "Help me set up a test ML project at /tmp/test-project"
 ```
 
 ### Package Installation Fails
@@ -62,13 +62,13 @@ df -h
 
 ### Python Version Not Available
 
-**Error**: `Python 3.14 may not be available via uv`
+**Error**: `Python 3.13 may not be available via uv`
 
 **Solution**:
 ```bash
 # Edit setup-universal.sh
-# Change PYTHON_VERSION="3.14" to "3.12" or "3.11"
-nano setup-universal.sh
+# Change PYTHON_VERSION="3.13" to "3.12" or "3.11"
+nano ~/.claude/skills/ml-env/scripts/setup-universal.sh
 
 # Or use a different Python
 uv python list  # See available versions
@@ -432,8 +432,9 @@ uv pip install torch torchvision torchaudio \
 4. **Reinstall PyTorch** (if still not working):
    ```bash
    rm -rf ml-env
-   ./setup-universal.sh
+   bash ~/.claude/skills/ml-env/scripts/setup-universal.sh
    ```
+   Or ask Claude: "Help me recreate my ML environment"
 
 ### WSL2 Network Issues
 
@@ -553,7 +554,7 @@ uv pip list
 
 # Recreate environment
 rm -rf ml-env
-./setup-universal.sh
+bash ~/.claude/skills/ml-env/scripts/setup-universal.sh
 
 # Or update specific package
 uv pip install --upgrade package-name
@@ -571,7 +572,7 @@ source ml-env/bin/activate
 # Verify Python version
 python --version
 
-# Should be 3.14 (or 3.12/3.11 if you changed it)
+# Should be 3.13 (or 3.12/3.11 if you changed it)
 ```
 
 ---
@@ -592,7 +593,7 @@ source /full/path/to/project/ml-env/bin/activate
 
 # Recreate if missing
 rm -rf ml-env
-./setup-universal.sh
+bash ~/.claude/skills/ml-env/scripts/setup-universal.sh
 ```
 
 ### Wrong Environment Activated
@@ -626,7 +627,7 @@ chmod -R u+w ml-env/
 
 # Or recreate with correct user
 rm -rf ml-env
-./setup-universal.sh
+bash ~/.claude/skills/ml-env/scripts/setup-universal.sh
 ```
 
 ---
@@ -706,7 +707,7 @@ This checks:
 **GPU Architecture Support**:
 - Newer Blackwell GPUs (RTX 5000 series, sm_120+): Experimental, may need nightly builds
 - Strix Halo (gfx1151): Requires special AMD builds
-- Older GPUs (sm_35 and below): Not supported by PyTorch 2.9.0
+- Older GPUs (sm_35 and below): Not supported by PyTorch 2.10.0
 
 **Platform Support**:
 - Linux: Full support ✅
@@ -715,8 +716,9 @@ This checks:
 - Windows native: Not supported (use WSL2)
 
 **Python Versions**:
-- 3.14: Preview support, may have issues
-- 3.12, 3.11: Recommended for production
+- 3.13: Recommended (default)
+- 3.12, 3.11: Also supported
+- 3.14: Preview, may have ML package compatibility issues
 - 3.10 and below: Not recommended
 
 ---
@@ -750,7 +752,7 @@ uv pip install torch torchvision torchaudio --pre --index-url https://download.p
 ```bash
 cd /path/to/project
 rm -rf ml-env
-./setup-universal.sh
+bash ~/.claude/skills/ml-env/scripts/setup-universal.sh
 ```
 
 ### Test GPU
