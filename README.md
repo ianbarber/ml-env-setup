@@ -57,8 +57,8 @@ cd ~/projects
 - ✅ Detect your hardware (NVIDIA/AMD/CPU)
 - ✅ Install PyTorch with the right backend
 - ✅ Set up ML libraries (numpy, pandas, scikit-learn, etc.)
-- ✅ Add a .gitignore
-- ✅ Validate the installation
+- ✅ Create a .gitignore for common ML files
+- ✅ Optionally initialize git
 
 ### Start Coding
 
@@ -97,50 +97,48 @@ ml-env-setup/setup.sh another-project
 The `setup.sh` script:
 
 1. **Creates Project Directory**: Makes the directory if it doesn't exist
-2. **Copies Setup Scripts**: Includes setup-universal.sh, validate.sh, and generate-skill.sh
-3. **Copies Documentation**: Adds README, HARDWARE guide, and Strix Halo docs
-4. **Creates .gitignore**: Ignores common ML files (models, data, logs, etc.)
-5. **Detects Hardware**: Runs setup-universal.sh which:
+2. **Creates .gitignore**: Ignores common ML files (models, data, logs, etc.)
+3. **Detects Hardware**: Determines what GPU (NVIDIA/AMD/CPU) you have via:
    - Checks for NVIDIA GPUs (via `nvidia-smi`)
    - Checks for AMD GPUs (via `rocminfo`)
    - Falls back to CPU if no GPU found
    - Detects WSL2 environment
-6. **Installs PyTorch**: Chooses the right build:
+4. **Installs PyTorch**: Chooses the right build:
    - NVIDIA: CUDA 12.8 or 13.0
-   - AMD: ROCm 6.4.4+ or 7.9 (for Strix Halo: gfx1151 builds)
+   - AMD: ROCm 6.4.4+ or 7.x (for Strix Halo: gfx1151 builds)
    - CPU: CPU-only build
-7. **Installs ML Libraries**: numpy, pandas, scikit-learn, jupyter, etc.
-8. **Creates Claude Skill**: Generates `.claude/skills/ml-env/` for environment help
-9. **Validates Installation**: Runs tests to verify everything works
-10. **Offers Git Init**: Optionally initializes git with good commit message
+5. **Installs ML Libraries**: numpy, pandas, scikit-learn, jupyter, accelerate, etc.
+6. **Validates Installation**: Runs tests to verify everything works
+7. **Offers Git Init**: Optionally initializes git with good commit message
 
-Each project gets its own isolated environment, so you can have different PyTorch versions or packages per project.
+Each project gets its own isolated `ml-env/` environment, so you can have different PyTorch versions or packages per project.
 
 ## What Gets Installed
 
-- **Python 3.14**
-- **PyTorch 2.9.0** with appropriate backend:
+- **Python 3.12 or 3.13**
+- **PyTorch 2.10.0** with appropriate backend:
   - NVIDIA (Ampere/Ada/Blackwell): CUDA 12.8 or 13.0
-  - AMD (RDNA/Strix Halo): ROCm 6.2
+  - AMD (RDNA/Strix Halo): ROCm 6.4.4+ or 7.x
   - CPU-only for systems without GPU
-- **torchvision and torchaudio**
+- **torchvision 0.25.0 and torchaudio 2.10.0**
 - **Essential ML libraries**: numpy, pandas, matplotlib, scikit-learn
-- **Development tools**: jupyter, ipython, tqdm, tensorboard
+- **Development tools**: jupyter, ipython, tqdm, tensorboard, accelerate
 
-## What You Get
+## What You Get in Each Project
 
 After running `./setup.sh`, your project will have:
 
 ```
 your-project/
 ├── ml-env/                  # Python virtual environment with PyTorch
-├── setup-universal.sh       # The setup script (for reference)
-├── validate.sh              # Test your installation
-├── .gitignore               # Ignores ml-env, logs, etc.
-├── README.md                # Documentation
-├── TROUBLESHOOTING.md       # Common issues and solutions
-└── UPDATE.md                # Maintenance and updating guide
+└── .gitignore               # Ignores ml-env, logs, models, data, etc.
 ```
+
+**Reference docs and scripts** are in the [ml-env-setup repository](https://github.com/ianbarber/ml-env-setup):
+- `setup-universal.sh` - Re-run if you need to recreate the environment
+- `validate.sh` - Validate installation at any time
+- `README.md`, `TROUBLESHOOTING.md`, `UPDATE.md` - Setup and maintenance docs
+- Global skill at `~/.claude/skills/ml-env/` - Setup guidance and best practices
 
 ## Documentation in This Repo
 

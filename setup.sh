@@ -47,10 +47,10 @@ Examples:
 
 What this does:
   1. Creates project directory (if needed)
-  2. Detects your hardware (NVIDIA/AMD/CPU)
-  3. Installs PyTorch with appropriate backend
-  4. Sets up ML libraries (numpy, pandas, etc.)
-  5. Creates Claude Code skill for environment
+  2. Creates .gitignore for ML projects
+  3. Detects your hardware (NVIDIA/AMD/CPU)
+  4. Installs PyTorch with appropriate backend
+  5. Sets up ML libraries (numpy, pandas, etc.)
   6. Validates installation
 
 Supported Hardware:
@@ -106,18 +106,6 @@ if [ -f "$PROJECT_PATH/ml-env/bin/activate" ]; then
     rm -rf "$PROJECT_PATH/ml-env"
 fi
 
-# Copy setup scripts to project
-echo ""
-echo -e "${BLUE}Copying setup scripts...${NC}"
-cp "$SCRIPT_DIR/setup-universal.sh" "$PROJECT_PATH/"
-cp "$SCRIPT_DIR/validate.sh" "$PROJECT_PATH/"
-
-# Copy documentation
-echo -e "${BLUE}Copying documentation...${NC}"
-cp "$SCRIPT_DIR/README.md" "$PROJECT_PATH/"
-cp "$SCRIPT_DIR/TROUBLESHOOTING.md" "$PROJECT_PATH/"
-cp "$SCRIPT_DIR/UPDATE.md" "$PROJECT_PATH/"
-
 # Create .gitignore if it doesn't exist
 if [ ! -f "$PROJECT_PATH/.gitignore" ]; then
     echo -e "${BLUE}Creating .gitignore...${NC}"
@@ -169,9 +157,6 @@ GITIGNORE
     echo -e "${GREEN}✓ Created .gitignore${NC}"
 fi
 
-echo -e "${GREEN}✓ Setup scripts copied${NC}"
-echo ""
-
 # Run the universal setup in the project directory
 cd "$PROJECT_PATH"
 
@@ -199,11 +184,11 @@ echo "  2. Activate the environment:"
 echo -e "     ${GREEN}Conda users:${NC}  ${BLUE}source ml-env/activate-safe.sh${NC}"
 echo -e "     ${GREEN}Others:${NC}       ${BLUE}source ml-env/bin/activate${NC}"
 echo ""
-echo "  3. Verify installation:"
-echo -e "     ${BLUE}./validate.sh${NC}"
-echo ""
-echo "  4. Start coding!"
+echo "  3. Start coding!"
 echo -e "     ${BLUE}python your_script.py${NC}"
+echo ""
+echo -e "${YELLOW}For validation or re-creating the environment:${NC}"
+echo -e "     ${BLUE}$SCRIPT_DIR/validate.sh${NC}"
 echo ""
 
 # Note about global Claude skill

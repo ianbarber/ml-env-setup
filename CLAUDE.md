@@ -12,13 +12,13 @@ The project creates **isolated project environments** outside the setup reposito
 
 ### Three-Layer Design
 
-1. **setup.sh** (Entry Point - ~242 lines)
+1. **setup.sh** (Entry Point - ~150 lines)
    - Single command interface: `./setup.sh project-path`
    - Creates project directory structure
-   - Copies setup scripts and documentation to target project
    - Creates .gitignore for ML projects
    - Delegates to setup-universal.sh for environment creation
    - Offers optional git initialization with good commit message
+   - Projects reference scripts/docs from the ml-env-setup repo, not copies
 
 2. **setup-universal.sh** (Core Logic - ~428 lines)
    - Hardware detection: NVIDIA/AMD/CPU/WSL2 (setup-universal.sh:37-67)
@@ -190,8 +190,9 @@ uv pip list | grep torch
 **This repo is a template/tool, not a project workspace**:
 - Users clone this repo once
 - They run `setup.sh` to create separate project directories elsewhere
-- Each project gets its own isolated environment + copies of setup scripts
-- This enables multiple projects with different PyTorch versions/configurations
+- Each project gets its own isolated `ml-env/` environment
+- Projects reference scripts and documentation from the ml-env-setup repo (not copies)
+- This enables multiple projects with different PyTorch versions/configurations while keeping projects lean
 - The ml-env-setup repo itself should remain clean (no ml-env/ directories here)
 
 ## Color Coding in Scripts
