@@ -265,11 +265,13 @@ with autocast():
 
 **Critical**: Official PyTorch wheels DO NOT work with gfx1151!
 
+**Reference project**: See `~/Projects/amdtest` for a working Strix Halo setup example.
+
 #### Prerequisites
 
 - Ubuntu 24.04+ recommended
-- Linux kernel 6.16.9+ recommended
-- ROCm 6.4.4+ or 7.0.2+ installed
+- Linux kernel 6.16.9+ recommended (automatic GTT memory support)
+- ROCm 7.x (recommended) or ROCm 6.4.4+ installed
 - User must be in `render` and `video` groups
 - 64GB+ RAM for large models (30B+)
 
@@ -285,29 +287,34 @@ groups | grep -E "render|video"
 # Add to groups if missing
 sudo usermod -aG render,video $USER
 newgrp render  # Or logout/login
+
+# Check ROCm version
+rocminfo | grep "ROCm version"
 ```
 
 #### Installation Options
 
-**Option 1: ROCm 6.4.4+ Nightlies (RECOMMENDED ⭐)**
+**Option 1: ROCm 7 Stable (RECOMMENDED ⭐)**
 
-Most stable, community-tested:
+Official AMD stable release for gfx1151 with best performance:
 ```bash
 source ml-env/bin/activate
 uv pip uninstall torch torchvision torchaudio
-uv pip install --pre torch torchvision torchaudio \
-  --index-url https://rocm.nightlies.amd.com/v2/gfx1151/
-```
-
-**Option 2: ROCm 7.9 Stable gfx1151 Builds**
-
-Official stable release:
-```bash
 uv pip install torch torchvision torchaudio \
   --index-url https://repo.amd.com/rocm/whl/gfx1151/
 ```
 
-**Option 3: ROCm 7.0.2+ Nightlies (Experimental)**
+Performance: ~31 TFLOPS BF16 (vs ~12 TFLOPS on ROCm 6.x) - about 2.5x faster.
+
+**Option 2: ROCm 6.4.4+ Nightlies (Fallback)**
+
+Use if ROCm 7 has issues on your system:
+```bash
+uv pip install --pre torch torchvision torchaudio \
+  --index-url https://rocm.nightlies.amd.com/v2/gfx1151/
+```
+
+**Option 3: ROCm 7 Nightlies (Cutting Edge)**
 
 Latest features, may be unstable:
 ```bash
@@ -372,8 +379,28 @@ print(f"Allocated: {torch.cuda.memory_allocated()/1e9:.2f}GB")
 print(f"Reserved: {torch.cuda.memory_reserved()/1e9:.2f}GB")
 ```
 
+#### ROCm 7.x Considerations
+
+**Benefits of ROCm 7.x for gfx1151:**
+- ~2.5x performance improvement in BF16 compute (31 TFLOPS vs 12 TFLOPS)
+- Up to 5x improvement in image generation workloads
+- Better long-term support path
+- Official stable builds available
+
+**Known limitations:**
+- hipBLASLt falls back to hipBLAS (slower) on gfx1151
+- LLM decode is memory-copy bound (~92-95% time in hipMemcpyWithStream)
+- Flash Attention may require `TORCH_ROCM_AOTRITON_ENABLE_EXPERIMENTAL=1`
+
+**Recommended environment variables for ROCm 7.x:**
+```bash
+export HSA_ENABLE_SDMA=0  # Prevents artifacts in VAE decodes
+export PYTORCH_HIP_ALLOC_CONF="backend:native,expandable_segments:True,garbage_collection_threshold:0.9"
+```
+
 #### Resources
 
+- Reference project: `~/Projects/amdtest` (working gfx1151 setup example)
 - Setup repo: https://github.com/ianbarber/strix-halo-skills
 - Community discussion: https://github.com/ROCm/TheRock/discussions/655
 - Community builds: https://github.com/scottt/rocm-TheRock/releases

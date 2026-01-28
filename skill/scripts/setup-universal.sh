@@ -214,21 +214,22 @@ determine_pytorch_install() {
                 echo -e "${BLUE}╚════════════════════════════════════════════════════════════════╝${NC}" >&2
                 echo "" >&2
                 echo -e "${YELLOW}⚠️  Official PyTorch wheels DO NOT work with gfx1151${NC}" >&2
-                echo -e "${YELLOW}   Must use AMD community nightlies or stable gfx1151 builds${NC}" >&2
+                echo -e "${YELLOW}   Must use AMD gfx1151-specific builds${NC}" >&2
                 echo "" >&2
-                echo "Choose ROCm installation option:" >&2
+                echo "Choose PyTorch installation for gfx1151:" >&2
                 echo "" >&2
-                echo "  ${GREEN}1) ROCm 6.4.4+ Nightlies (RECOMMENDED - Stable)${NC}" >&2
-                echo "     Index: https://rocm.nightlies.amd.com/v2/gfx1151/" >&2
-                echo "     Status: Works well, tested by community" >&2
-                echo "" >&2
-                echo "  ${YELLOW}2) ROCm 7.9 Stable gfx1151 Build (NEWEST)${NC}" >&2
+                echo "  ${GREEN}1) ROCm 7 Stable (RECOMMENDED)${NC}" >&2
                 echo "     Index: https://repo.amd.com/rocm/whl/gfx1151/" >&2
-                echo "     Status: Official stable release for gfx1151" >&2
+                echo "     Official AMD stable release for gfx1151" >&2
+                echo "     Best performance: ~31 TFLOPS BF16, ~2.5x faster than ROCm 6.x" >&2
                 echo "" >&2
-                echo "  ${BLUE}3) ROCm 7.0.2+ Nightlies (EXPERIMENTAL)${NC}" >&2
+                echo "  ${YELLOW}2) ROCm 6.4.4+ Nightlies (Fallback)${NC}" >&2
                 echo "     Index: https://rocm.nightlies.amd.com/v2/gfx1151/" >&2
-                echo "     Status: Latest features, may be unstable" >&2
+                echo "     Use if ROCm 7 has issues on your system" >&2
+                echo "" >&2
+                echo "  ${BLUE}3) ROCm 7 Nightlies (Cutting Edge)${NC}" >&2
+                echo "     Index: https://rocm.nightlies.amd.com/v2/gfx1151/" >&2
+                echo "     Latest features, may be unstable" >&2
                 echo "" >&2
                 echo "  ${RED}4) CPU-only (Safe fallback)${NC}" >&2
                 echo "     No GPU acceleration" >&2
@@ -237,17 +238,17 @@ determine_pytorch_install() {
 
                 case $choice in
                     1)
-                        echo -e "${GREEN}Installing PyTorch with ROCm 6.4.4+ nightlies${NC}" >&2
-                        PYTORCH_VERSION="--pre torch torchvision torchaudio"
-                        INDEX_URL="https://rocm.nightlies.amd.com/v2/gfx1151/"
-                        ;;
-                    2)
-                        echo -e "${GREEN}Installing PyTorch with ROCm 7.9 stable gfx1151${NC}" >&2
+                        echo -e "${GREEN}Installing PyTorch with ROCm 7 stable gfx1151 build${NC}" >&2
                         PYTORCH_VERSION="torch torchvision torchaudio"
                         INDEX_URL="https://repo.amd.com/rocm/whl/gfx1151/"
                         ;;
+                    2)
+                        echo -e "${YELLOW}Installing PyTorch with ROCm 6.4.4+ nightlies${NC}" >&2
+                        PYTORCH_VERSION="--pre torch torchvision torchaudio"
+                        INDEX_URL="https://rocm.nightlies.amd.com/v2/gfx1151/"
+                        ;;
                     3)
-                        echo -e "${YELLOW}Installing PyTorch with ROCm 7.0.2+ nightlies (experimental)${NC}" >&2
+                        echo -e "${BLUE}Installing PyTorch with ROCm 7 nightlies (cutting edge)${NC}" >&2
                         PYTORCH_VERSION="--pre torch torchvision torchaudio"
                         INDEX_URL="https://rocm.nightlies.amd.com/v2/gfx1151/"
                         ;;
@@ -260,7 +261,8 @@ determine_pytorch_install() {
 
                 echo "" >&2
                 echo -e "${BLUE}ℹ️  Note: For large models (30B+), configure GTT memory${NC}" >&2
-                echo -e "${BLUE}   See: https://github.com/ianbarber/strix-halo-skills${NC}" >&2
+                echo -e "${BLUE}   Reference project: ~/Projects/amdtest${NC}" >&2
+                echo -e "${BLUE}   See also: https://github.com/ianbarber/strix-halo-skills${NC}" >&2
 
             else
                 # Other AMD GPUs (RDNA 2/3)

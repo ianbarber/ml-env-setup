@@ -112,11 +112,11 @@ ml-env-setup/
 Keep CLAUDE.md, SKILL.md, and setup-universal.sh in sync:
 
 ```
-# Current as of 2026-01-23
+# Current as of 2026-01-28
 PyTorch: 2.10.0
 Python: 3.13 (default), 3.12, 3.11 (avoid 3.14 - ML package compatibility issues)
 CUDA: 12.8, 13.0
-ROCm: 6.2, 6.4.4+, 7.x
+ROCm: 6.2 (RDNA), 7.x preferred for Strix Halo (6.4.4+ as fallback)
 ```
 
 **Note**: The setup-universal.sh script defaults to Python 3.13. Users can change to 3.12 or 3.11 if needed, but Python 3.14 should be avoided due to ML package compatibility issues.
@@ -132,11 +132,13 @@ Update these files when new versions release:
 **Strix Halo (gfx1151) AMD GPU:**
 - Most complex hardware path
 - Official PyTorch wheels completely incompatible
-- Must use AMD nightly builds: `https://rocm.nightlies.amd.com/v2/gfx1151/`
-- Requires ROCm 6.4.4+ or 7.x
+- **ROCm 7 stable (recommended)**: `https://repo.amd.com/rocm/whl/gfx1151/`
+- **ROCm 6.4.4+ nightlies (fallback)**: `https://rocm.nightlies.amd.com/v2/gfx1151/`
+- ROCm 7 provides ~2.5x performance improvement (~31 TFLOPS BF16 vs ~12 TFLOPS)
 - User must be in render/video groups
 - GTT memory configuration needed for 30B+ models
-- See: https://github.com/ianbarber/strix-halo-skills
+- Reference project: ~/Projects/amdtest
+- See also: https://github.com/ianbarber/strix-halo-skills
 
 **Blackwell GPU (RTX 5090):**
 - sm_120+ is experimental in PyTorch 2.9.0

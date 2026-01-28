@@ -80,14 +80,17 @@ python -c "import torch; print(f'PyTorch: {torch.__version__}'); print(f'CUDA: {
 - **Setup**: `sudo usermod -aG render,video $USER && newgrp render`
 
 ### AMD Strix Halo (gfx1151)
-**⚠️ This is complex and requires special handling!**
+**⚠️ This requires special handling - official PyTorch wheels do NOT work!**
 
 - **GPU**: Ryzen AI MAX+ 395 with gfx1151
-- **Critical issue**: Official PyTorch wheels do NOT work
-- **Solution**: Must use AMD community nightly builds
-- **ROCm**: 6.4.4+ or 7.x
+- **Critical issue**: Official PyTorch wheels fail with "HIP error: invalid device function"
+- **Solution**: Use AMD gfx1151-specific builds
+- **ROCm 7 (Recommended)**: `https://repo.amd.com/rocm/whl/gfx1151/` - ~31 TFLOPS BF16
+- **ROCm 6.4.4+ (Fallback)**: `https://rocm.nightlies.amd.com/v2/gfx1151/` - ~12 TFLOPS BF16
 - **Memory limits**: Default ~33GB; configure GTT for larger models (30B+)
 - **Setup requires**: User in `render` and `video` groups, Linux kernel 6.14+
+
+**Reference project**: See `~/Projects/amdtest` for a working gfx1151 setup example.
 
 See [TROUBLESHOOTING.md](TROUBLESHOOTING.md) for complete Strix Halo setup and GTT memory configuration.
 
@@ -101,7 +104,7 @@ See [TROUBLESHOOTING.md](TROUBLESHOOTING.md) for complete Strix Halo setup and G
 - **PyTorch**: 2.10.0
 - **Python**: 3.13 (or 3.12 if needed)
 - **CUDA**: 12.8 (main), 13.0 (Blackwell experimental)
-- **ROCm**: 6.2 (RDNA), 6.4.4+/7.x (Strix Halo)
+- **ROCm**: 6.2 (RDNA), 7.x preferred for Strix Halo (6.4.4+ as fallback)
 - **Key ML libs**: numpy, pandas, matplotlib, scikit-learn, jupyter, accelerate, tensorboard
 
 ## Validating an Existing Environment
