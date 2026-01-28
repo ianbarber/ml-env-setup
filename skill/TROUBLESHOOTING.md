@@ -304,7 +304,7 @@ uv pip install torch torchvision torchaudio \
   --index-url https://repo.amd.com/rocm/whl/gfx1151/
 ```
 
-Performance: ~31 TFLOPS BF16 (vs ~12 TFLOPS on ROCm 6.x) - about 2.5x faster.
+Performance (reported/observed by community benchmarks): ~31 TFLOPS BF16 (vs ~12 TFLOPS on ROCm 6.x) — roughly ~2.5x faster (varies by workload and clocks).
 
 **Option 2: ROCm 6.4.4+ Nightlies (Fallback)**
 
@@ -383,7 +383,7 @@ print(f"Reserved: {torch.cuda.memory_reserved()/1e9:.2f}GB")
 
 **Benefits of ROCm 7.x for gfx1151:**
 - ~2.5x performance improvement in BF16 compute (31 TFLOPS vs 12 TFLOPS)
-- Up to 5x improvement in image generation workloads
+- Potentially large improvements in image generation workloads (community reports vary; measure on your workload)
 - Better long-term support path
 - Official stable builds available
 
@@ -394,7 +394,7 @@ print(f"Reserved: {torch.cuda.memory_reserved()/1e9:.2f}GB")
 
 **Recommended environment variables for ROCm 7.x:**
 ```bash
-export HSA_ENABLE_SDMA=0  # Prevents artifacts in VAE decodes
+export HSA_ENABLE_SDMA=0  # Can prevent artifacts in some workloads (may reduce throughput)
 export PYTORCH_HIP_ALLOC_CONF="backend:native,expandable_segments:True,garbage_collection_threshold:0.9"
 ```
 

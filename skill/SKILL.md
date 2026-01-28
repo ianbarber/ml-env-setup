@@ -88,7 +88,7 @@ python -c "import torch; print(f'PyTorch: {torch.__version__}'); print(f'CUDA: {
 - **ROCm 7 (Recommended)**: `https://repo.amd.com/rocm/whl/gfx1151/` - ~31 TFLOPS BF16
 - **ROCm 6.4.4+ (Fallback)**: `https://rocm.nightlies.amd.com/v2/gfx1151/` - ~12 TFLOPS BF16
 - **Memory limits**: Default ~33GB; configure GTT for larger models (30B+)
-- **Setup requires**: User in `render` and `video` groups, Linux kernel 6.14+
+- **Setup requires**: User in `render` and `video` groups, Linux kernel 6.14+ (6.16.9+ recommended for automatic UMA/GTT behavior)
 
 **Reference project**: See `~/Projects/amdtest` for a working gfx1151 setup example.
 
