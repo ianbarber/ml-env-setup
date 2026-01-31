@@ -1,191 +1,91 @@
-#!/bin/bash
-set -e
+#!/usr/bin/env bash
+set -euo pipefail
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-ENV_NAME="ml-env"
-ENV_PATH="$SCRIPT_DIR/$ENV_NAME"
+# Conda-first validation script.
+# Run from inside your project dir. It will use ENV_NAME or default ml-<project>.
 
-# Colors for output
+PROJECT_DIR="$(pwd)"
+PROJECT_NAME="$(basename "$PROJECT_DIR")"
+ENV_NAME="${ENV_NAME:-ml-${PROJECT_NAME}}"
+
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
-NC='\033[0m' # No Color
+NC='\033[0m'
 
-echo -e "${BLUE}=== ML Environment Validation ===${NC}"
-echo ""
+echo -e "${BLUE}=== ML Environment Validation (conda) ===${NC}"
+echo "Project: $PROJECT_DIR"
+echo "Env: $ENV_NAME"
+echo
 
-# Check if environment exists
-if [ ! -d "$ENV_PATH" ]; then
-    echo -e "${RED}✗ Error: ml-env directory not found at $ENV_PATH${NC}"
-    echo "Run ./setup-universal.sh first"
-    exit 1
-fi
-
-echo -e "${GREEN}✓ Environment directory found${NC}"
-
-# Activate environment (use safe wrapper if available for conda users)
-if [ -f "$ENV_PATH/activate-safe.sh" ]; then
-    source "$ENV_PATH/activate-safe.sh"
-else
-    source "$ENV_PATH/bin/activate"
-fi
-
-echo ""
-echo -e "${BLUE}1. Python Version${NC}"
-python --version
-
-echo ""
-echo -e "${BLUE}2. UV Version${NC}"
-uv --version
-
-echo ""
-echo -e "${BLUE}3. PyTorch Installation${NC}"
-python -c "import torch; print(f'PyTorch: {torch.__version__}')" || {
-    echo -e "${RED}✗ PyTorch not installed correctly${NC}"
-    exit 1
+ensure_conda() {
+  if command -v conda >/dev/null 2>&1; then
+    return 0
+  fi
+  if [ -f "$HOME/miniforge/etc/profile.d/conda.sh" ]; then
+    # shellcheck disable=SC1091
+    . "$HOME/miniforge/etc/profile.d/conda.sh"
+  elif [ -f "$HOME/miniconda3/etc/profile.d/conda.sh" ]; then
+    # shellcheck disable=SC1091
+    . "$HOME/miniconda3/etc/profile.d/conda.sh"
+  fi
+  command -v conda >/dev/null 2>&1
 }
-echo -e "${GREEN}✓ PyTorch installed${NC}"
 
-echo ""
-echo -e "${BLUE}4. Backend Detection${NC}"
-
-# Check for CUDA
-CUDA_AVAILABLE=$(python -c "import torch; print(torch.cuda.is_available())")
-ROCM_AVAILABLE=$(python -c "import torch; print(hasattr(torch.version, 'hip') and torch.version.hip is not None)")
-
-if [ "$CUDA_AVAILABLE" == "True" ]; then
-    echo -e "${GREEN}✓ CUDA Backend Detected${NC}"
-
-    echo ""
-    echo -e "${BLUE}5. CUDA Information${NC}"
-    python -c "import torch; print(f'CUDA Version: {torch.version.cuda}')"
-    python -c "import torch; print(f'cuDNN Version: {torch.backends.cudnn.version()}')"
-    python -c "import torch; print(f'GPU Count: {torch.cuda.device_count()}')"
-
-    echo ""
-    echo -e "${BLUE}6. GPU Details${NC}"
-    for i in $(seq 0 $(($(python -c "import torch; print(torch.cuda.device_count())") - 1))); do
-        echo -e "GPU $i:"
-        python -c "import torch; print(f'  Name: {torch.cuda.get_device_name($i)}')"
-        python -c "import torch; print(f'  Compute Capability: {torch.cuda.get_device_capability($i)}')"
-        python -c "import torch; cap = torch.cuda.get_device_capability($i); print(f'  SM Version: sm_{cap[0]}{cap[1]}')"
-        python -c "import torch; mem = torch.cuda.get_device_properties($i).total_memory / 1024**3; print(f'  Memory: {mem:.2f} GB')"
-    done
-
-    echo ""
-    echo -e "${BLUE}7. Testing GPU Computation${NC}"
-    python -c "
-import torch
-import time
-
-device = torch.device('cuda:0')
-print(f'Using device: {device}')
-
-# Test basic operations
-x = torch.randn(1000, 1000, device=device)
-y = torch.randn(1000, 1000, device=device)
-
-start = time.time()
-z = torch.matmul(x, y)
-torch.cuda.synchronize()
-end = time.time()
-
-print(f'Matrix multiplication successful: {z.shape}')
-print(f'Computation time: {(end-start)*1000:.2f} ms')
-" && echo -e "${GREEN}✓ GPU computation successful${NC}" || echo -e "${RED}✗ GPU computation failed${NC}"
-
-    # Show nvidia-smi if available
-    if command -v nvidia-smi &> /dev/null; then
-        echo ""
-        echo -e "${BLUE}8. NVIDIA GPU Status${NC}"
-        nvidia-smi --query-gpu=index,name,temperature.gpu,utilization.gpu,memory.used,memory.total --format=csv
-    fi
-
-elif [ "$ROCM_AVAILABLE" == "True" ]; then
-    echo -e "${GREEN}✓ ROCm Backend Detected${NC}"
-
-    echo ""
-    echo -e "${BLUE}5. ROCm Information${NC}"
-    python -c "import torch; print(f'ROCm Version: {torch.version.hip}')"
-    python -c "import torch; print(f'GPU Count: {torch.cuda.device_count()}')"  # PyTorch uses cuda API for ROCm too
-
-    echo ""
-    echo -e "${BLUE}6. GPU Details${NC}"
-    for i in $(seq 0 $(($(python -c "import torch; print(torch.cuda.device_count())") - 1))); do
-        echo -e "GPU $i:"
-        python -c "import torch; print(f'  Name: {torch.cuda.get_device_name($i)}')"
-    done
-
-    echo ""
-    echo -e "${BLUE}7. Testing GPU Computation${NC}"
-    python -c "
-import torch
-import time
-
-device = torch.device('cuda:0')
-print(f'Using device: {device}')
-
-# Test basic operations
-x = torch.randn(1000, 1000, device=device)
-y = torch.randn(1000, 1000, device=device)
-
-start = time.time()
-z = torch.matmul(x, y)
-torch.cuda.synchronize()
-end = time.time()
-
-print(f'Matrix multiplication successful: {z.shape}')
-print(f'Computation time: {(end-start)*1000:.2f} ms')
-" && echo -e "${GREEN}✓ GPU computation successful${NC}" || echo -e "${RED}✗ GPU computation failed${NC}"
-
-    # Show rocm-smi if available
-    if command -v rocm-smi &> /dev/null; then
-        echo ""
-        echo -e "${BLUE}8. AMD GPU Status${NC}"
-        rocm-smi
-    fi
-
-else
-    echo -e "${YELLOW}⚠️  CPU-only PyTorch (No GPU backend detected)${NC}"
-
-    echo ""
-    echo -e "${BLUE}5. Testing CPU Computation${NC}"
-    python -c "
-import torch
-import time
-
-device = torch.device('cpu')
-print(f'Using device: {device}')
-
-# Test basic operations
-x = torch.randn(1000, 1000, device=device)
-y = torch.randn(1000, 1000, device=device)
-
-start = time.time()
-z = torch.matmul(x, y)
-end = time.time()
-
-print(f'Matrix multiplication successful: {z.shape}')
-print(f'Computation time: {(end-start)*1000:.2f} ms')
-" && echo -e "${GREEN}✓ CPU computation successful${NC}" || echo -e "${RED}✗ CPU computation failed${NC}"
+if ! ensure_conda; then
+  echo -e "${RED}✗ conda not available${NC}"
+  exit 1
 fi
 
-echo ""
-echo -e "${BLUE}9. Installed Packages${NC}"
-echo "Core ML packages:"
-uv pip list | grep -E "torch|numpy|pandas|scikit|jupyter|matplotlib|tensorboard" || echo "Packages not found"
+echo -e "${GREEN}✓ conda: $(conda --version)${NC}"
 
-echo ""
+if ! conda env list | awk '{print $1}' | grep -qx "$ENV_NAME"; then
+  echo -e "${RED}✗ env not found: $ENV_NAME${NC}"
+  echo "Run setup-universal.sh first (or set ENV_NAME=...)."
+  exit 1
+fi
+
+echo -e "${GREEN}✓ env exists${NC}"
+
+echo
+echo -e "${BLUE}1) Python${NC}"
+conda run -n "$ENV_NAME" python --version
+
+echo
+echo -e "${BLUE}2) PyTorch${NC}"
+conda run -n "$ENV_NAME" python -c "import torch; print('torch', torch.__version__)"
+
+echo
+echo -e "${BLUE}3) Backend${NC}"
+conda run -n "$ENV_NAME" python - <<'PY'
+import torch
+print('cuda available:', torch.cuda.is_available())
+print('torch.version.cuda:', getattr(torch.version, 'cuda', None))
+print('torch.version.hip:', getattr(torch.version, 'hip', None))
+if torch.cuda.is_available():
+    print('device:', torch.cuda.get_device_name(0))
+    print('count:', torch.cuda.device_count())
+PY
+
+echo
+echo -e "${BLUE}4) Quick matmul${NC}"
+conda run -n "$ENV_NAME" python - <<'PY'
+import time
+import torch
+
+dev = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
+print('device:', dev)
+
+x = torch.randn(1024, 1024, device=dev)
+y = torch.randn(1024, 1024, device=dev)
+
+t0 = time.time()
+z = x @ y
+if dev.type == 'cuda':
+    torch.cuda.synchronize()
+print('ok', z.shape, 'ms', (time.time()-t0)*1000)
+PY
+
+echo
 echo -e "${GREEN}=== Validation Complete ===${NC}"
-
-# Check for WSL
-if grep -qi microsoft /proc/version 2>/dev/null; then
-    echo ""
-    echo -e "${BLUE}ℹ️  WSL2 Environment Detected${NC}"
-    if [ "$CUDA_AVAILABLE" == "True" ]; then
-        echo -e "${GREEN}✓ CUDA is working correctly in WSL2${NC}"
-    fi
-fi
-
-echo ""
