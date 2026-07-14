@@ -2,6 +2,17 @@
 
 All notable changes to the ml-env skill are documented here.
 
+## [2026-07-14] - Default CUDA index bumped to cu132 (no driver update needed)
+
+### Changed
+- NVIDIA default CUDA index: cu130 → **cu132** (CUDA 13.2). Verified on the whole
+  fleet (GB10/aarch64 sm_121, RTX 5090 sm_120, RTX 3090 sm_86) that driver 580.x
+  runs cu132 wheels via **CUDA minor-version compatibility** — no driver upgrade
+  or reboot required. cu130 remains as a fallback for older drivers.
+- Supersedes the earlier caution that cu132 needed newer drivers: that assumed
+  the driver's reported max-CUDA was a hard limit. Same PyTorch 2.13.0 on either
+  index; cu132 is now the default purely to track the latest CUDA release.
+
 ## [2026-07-14] - Align docs to conda-first, fix gfx1151 wheels, prefer latest
 
 ### Fixed

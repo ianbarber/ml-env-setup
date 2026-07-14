@@ -48,8 +48,8 @@ Most often a **driver/CUDA mismatch**:
 nvidia-smi                       # check the "CUDA Version: X.Y" line = driver's max
 python -c "import torch; print(torch.version.cuda)"   # what torch was built for
 ```
-The default `cu130` wheels (CUDA 13.0) need driver 580+ (CUDA 13.0). If your
-driver reports an older max, reinstall from an older index:
+The default `cu132` wheels (CUDA 13.2) run on driver 580.x via CUDA minor-version
+compat. If your driver is older and CUDA won't initialize, drop to an older index:
 ```bash
 ENV_PYTHON="$(conda run -n ml-<project> which python)"
 "$ENV_PYTHON" -m pip install --force-reinstall --no-deps \
@@ -71,9 +71,9 @@ python -c "import torch; print('cuda', torch.version.cuda); print('hip', getattr
 ```
 Reinstall PyTorch from the right index (activate the env first):
 ```bash
-# NVIDIA (cu130 default; cu128 fallback for older drivers)
+# NVIDIA (cu132 default; cu130/cu128 fallback for older drivers)
 python -m pip install --force-reinstall --no-deps torch torchvision torchaudio \
-  --index-url https://download.pytorch.org/whl/cu130
+  --index-url https://download.pytorch.org/whl/cu132
 
 # generic AMD (rocm7.2)
 python -m pip install --force-reinstall --no-deps torch torchvision torchaudio \

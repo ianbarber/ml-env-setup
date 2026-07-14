@@ -40,7 +40,7 @@ Claude creates the project dir, then runs the setup script, which:
 
 1. Detects hardware (NVIDIA / AMD / CPU / WSL2).
 2. Creates a conda env `ml-<project>` (Python 3.13).
-3. Installs **PyTorch 2.13.0** with the right backend (CUDA `cu130`, ROCm `7.2`,
+3. Installs **PyTorch 2.13.0** with the right backend (CUDA `cu132`, ROCm `7.2`,
    or CPU; gfx1151 uses verified AMD tracks).
 4. Installs common ML libs (numpy, pandas, scikit-learn, jupyter, …).
 5. Writes a `.gitignore` and a setup log into the project.
@@ -74,13 +74,13 @@ arch, and runs a real matmul.
 |---|---|---|
 | Python | 3.13 | overridable via `PYTHON_VERSION` |
 | PyTorch | 2.13.0 | latest stable on the indexes below |
-| CUDA (NVIDIA) | cu130 | CUDA 13.0; cu132 needs newer drivers |
+| CUDA (NVIDIA) | cu132 | CUDA 13.2; runs on driver 580.x via minor-version compat (cu130 fallback) |
 | ROCm (generic AMD) | rocm7.2 | |
 | gfx1151 (Strix Halo) | TheRock multi-arch nightly | official wheels don't work |
 
 ## Supported hardware
 
-- **NVIDIA**: RTX 30/40/50 series, GB10, data-center — CUDA `cu130`. Blackwell
+- **NVIDIA**: RTX 30/40/50 series, GB10, data-center — CUDA `cu132`. Blackwell
   (sm_120+) is supported natively by PyTorch 2.13. WSL2 with Windows drivers.
 - **AMD RDNA / other** (non-gfx1151): ROCm `rocm7.2`. Requires `render`+`video`
   groups.

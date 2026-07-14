@@ -9,12 +9,13 @@ set -euo pipefail
 # ----------------------------------------------------------------------------
 # Overridable version defaults (prefer latest, fleet-safe — verified 2026-07-14)
 #
-#   PYTHON_VERSION  default 3.13  (latest mature; cu130/rocm7.2/gfx1151-nightly
+#   PYTHON_VERSION  default 3.13  (latest mature; cu132/rocm7.2/gfx1151-nightly
 #                                  all ship cp313 wheels)
-#   TORCH_VERSION   default 2.13.0 (latest stable on cu130 / rocm7.2)
-#   CUDA_INDEX      default cu130  (CUDA 13.0 — the 3 fleet NVIDIA boxes are
-#                                   driver 580.x = max CUDA 13.0. Use cu132 only
-#                                   after upgrading drivers.)
+#   TORCH_VERSION   default 2.13.0 (latest stable on cu132 / rocm7.2)
+#   CUDA_INDEX      default cu132  (CUDA 13.2 — runs on the fleet's driver 580.x
+#                                   via CUDA minor-version compatibility; verified
+#                                   on GB10/RTX 5090/RTX 3090 on 2026-07-14.
+#                                   Drop to cu130 if a driver is ever too old.)
 #   ROCM_INDEX      default rocm7.2 (latest on pytorch.org)
 #
 # gfx1151 (Strix Halo) ignores TORCH_VERSION/CUDA_INDEX and uses its own
@@ -23,7 +24,7 @@ set -euo pipefail
 
 PYTHON_VERSION_DEFAULT="3.13"
 TORCH_VERSION_DEFAULT="2.13.0"
-CUDA_INDEX_DEFAULT="cu130"
+CUDA_INDEX_DEFAULT="cu132"
 ROCM_INDEX_DEFAULT="rocm7.2"
 
 PROJECT_DIR="$(pwd)"
@@ -294,7 +295,7 @@ install_pytorch() {
     echo -e "${YELLOW}NVIDIA GPU detected (compute capability: ${cc_major}.${cc_minor}, sm_${cc_major}${cc_minor})${NC}"
 
     if [ "${cc_major:-0}" -ge 12 ]; then
-      # Blackwell (sm_120+) is natively supported by PyTorch >= 2.12 on cu130 —
+      # Blackwell (sm_120+) is natively supported by PyTorch >= 2.12 on cu132 —
       # no special "experimental" handling needed.
       echo -e "${YELLOW}Blackwell-class GPU — supported natively by PyTorch ${TORCH_VERSION} on ${CUDA_INDEX}.${NC}"
     fi

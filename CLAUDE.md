@@ -118,7 +118,7 @@ Keep CLAUDE.md, SKILL.md, and setup-universal.sh in sync:
 # Current as of 2026-07-14 (prefer latest, verified against live indexes + fleet)
 PyTorch: 2.13.0           # NVIDIA/CPU/generic-AMD; gfx1151 nightly resolves ~2.12
 Python: 3.13 (default; gfx1151 AMD-stable alt track needs 3.12)
-CUDA:   cu130 (CUDA 13.0)  # cu132 exists but fleet NVIDIA boxes are driver 580.x = max CUDA 13.0
+CUDA:   cu132 (CUDA 13.2)  # runs on fleet driver 580.x via CUDA minor-version compat (verified GB10/5090/3090); cu130 fallback
 ROCm:   rocm7.2 (generic AMD); gfx1151 → TheRock whl-multi-arch nightly (default) or AMD stable 7.2.1
 ```
 
@@ -153,10 +153,11 @@ Update these files when new versions release:
   https://github.com/ianbarber/strix-halo-flashattn-build.
 
 **Blackwell GPU (RTX 5090 / GB10, sm_120+):**
-- Natively supported by PyTorch 2.13.0 on cu130 — no special menu or "experimental"
-  handling. Just the standard NVIDIA/cu130 path.
-- Fleet boxes (steed GB10, leejr RTX 5090) are driver 580.x (max CUDA 13.0), so
-  cu130 is correct; cu132 would need newer drivers.
+- Natively supported by PyTorch 2.13.0 on cu132 — no special menu or "experimental"
+  handling. Just the standard NVIDIA/cu132 path.
+- Fleet boxes (steed GB10, leejr RTX 5090, chunklebox RTX 3090) are driver 580.x;
+  cu132 runs on them via CUDA minor-version compatibility (verified 2026-07-14).
+  No driver upgrade needed.
 
 **WSL2:**
 - Uses Windows NVIDIA drivers (NOT Linux drivers)

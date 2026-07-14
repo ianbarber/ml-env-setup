@@ -14,14 +14,14 @@ python -m pip list --outdated
 ## Update PyTorch
 
 Latest stable lives at https://pytorch.org/get-started/locally/ . ml-env defaults
-(PyTorch 2.13.0, cu130 / rocm7.2) are overridable vars at the top of
+(PyTorch 2.13.0, cu132 / rocm7.2) are overridable vars at the top of
 `setup-universal.sh`.
 
 ```bash
 conda activate ml-<project>
 
-# NVIDIA (cu130 default)
-python -m pip install --upgrade --index-url https://download.pytorch.org/whl/cu130 \
+# NVIDIA (cu132 default)
+python -m pip install --upgrade --index-url https://download.pytorch.org/whl/cu132 \
   torch torchvision torchaudio
 
 # generic AMD (rocm7.2)
@@ -58,8 +58,8 @@ python -m pip install --upgrade <package-name>
 nvidia-smi                      # "CUDA Version: X.Y" = driver's max supported
 python -c "import torch; print(torch.cuda.get_device_capability(0))"
 ```
-The `cu130` wheels need a driver that supports CUDA 13.0 (580+). If `nvidia-smi`
-reports an older max, use the `cu128` index instead.
+The `cu132` wheels need driver 580+ (CUDA 13.2 runs on 580.x via minor-version
+compat). If `nvidia-smi` reports an older max, use the `cu130` or `cu128` index.
 
 ## Recreate the environment from scratch
 

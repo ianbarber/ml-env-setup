@@ -33,7 +33,7 @@ bash ~/.claude/skills/ml-env/scripts/validate.sh
 The setup script (`~/.claude/skills/ml-env/scripts/setup-universal.sh`):
 - Detects your GPU (NVIDIA via `nvidia-smi`, AMD via `rocminfo`, else CPU).
 - Creates a conda env `ml-<basename-of-cwd>` (Python 3.13 by default).
-- Installs **PyTorch 2.13.0** with the right backend (CUDA `cu130`, ROCm `7.2`,
+- Installs **PyTorch 2.13.0** with the right backend (CUDA `cu132`, ROCm `7.2`,
   or CPU); gfx1151 uses its own verified tracks.
 - Installs: numpy, pandas, matplotlib, scikit-learn, jupyter, tensorboard,
   accelerate.
@@ -62,18 +62,18 @@ Overridable via environment variables — see the header of `setup-universal.sh`
 | Component | Default | Notes |
 |---|---|---|
 | Python | **3.13** | latest mature; all backends ship cp313. Use 3.12 only if a package needs it. |
-| PyTorch | **2.13.0** | latest stable on cu130 / rocm7.2 |
-| CUDA (NVIDIA) | **cu130** | CUDA 13.0. cu132 (13.2) exists but needs newer drivers; the fleet boxes are driver 580.x = max CUDA 13.0. |
+| PyTorch | **2.13.0** | latest stable on cu132 / rocm7.2 |
+| CUDA (NVIDIA) | **cu132** | CUDA 13.2; runs on the fleet's driver 580.x via minor-version compat (verified on GB10/RTX 5090/RTX 3090). Drop to cu130 if a driver is ever too old. |
 | ROCm (generic AMD) | **rocm7.2** | latest on pytorch.org |
 | gfx1151 (Strix Halo) | **TheRock nightly** | see below — official wheels do not work |
 
 ## Hardware-Specific Guidance
 
 ### NVIDIA GPUs (Ampere / Ada / Blackwell)
-- CUDA `cu130` wheels. Driver 580+ required (CUDA 13.0).
+- CUDA `cu132` wheels (CUDA 13.2). Run on driver 580.x via minor-version compat.
 - **Blackwell (RTX 5090, GB10, sm_120+):** natively supported by PyTorch 2.13 on
-  cu130 — no special handling. (If an older PyTorch is forced, fall back to
-  nightly: `--pre --index-url …/whl/nightly/cu130`.)
+  cu132 — no special handling. (If an older PyTorch is forced, fall back to
+  nightly: `--pre --index-url …/whl/nightly/cu132`.)
 - **WSL2:** use the Windows NVIDIA driver only — do **not** install a Linux
   driver inside WSL.
 
@@ -124,8 +124,9 @@ groups | grep -E "render|video"  # AMD requires these
 ```
 
 **PyTorch installed but `cuda.is_available()` is False:**
-- NVIDIA: driver too old for the CUDA wheel (cu130 needs driver 580+ / CUDA 13.0).
-  Check `nvidia-smi`'s "CUDA Version" line, or drop to `cu128`.
+- NVIDIA: driver too old for the CUDA wheel (cu132 needs driver 580+; the fleet's
+  580.x covers it via CUDA minor-version compat). Check `nvidia-smi`'s "CUDA
+  Version" line, or drop to `cu130`/`cu128`.
 - AMD: check groups and that you installed a gfx-appropriate build (not vanilla).
 
 **CUDA out of memory / slow training:** these are general PyTorch questions — see
