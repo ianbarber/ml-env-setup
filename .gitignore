@@ -1,5 +1,4 @@
-# Virtual environment
-ml-env/
+# Virtual environments (project-local, if any; conda envs live elsewhere)
 .venv/
 venv/
 env/

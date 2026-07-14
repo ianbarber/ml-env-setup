@@ -2,6 +2,41 @@
 
 All notable changes to the ml-env skill are documented here.
 
+## [2026-07-14] - Align docs to conda-first, fix gfx1151 wheels, prefer latest
+
+### Fixed
+- **gfx1151 wheel guidance was wrong.** The "recommended"
+  `repo.amd.com/rocm/whl/gfx1151/` index serves only torch 2.9.1, and the script's
+  `torch==2.10.0` pin would not resolve from it. Replaced with the two verified
+  tracks from strix-halo-setup v2.0.0: TheRock multi-arch nightly (default) and
+  AMD-supported stable ROCm 7.2.1 (repo.radeon.com).
+- **uv clobbered hardware-specific torch.** `install_ml_packages` used
+  `uv pip install -U`, whose holistic re-resolution replaced the gfx1151 ROCm
+  torch with a CUDA wheel. Now uses plain `pip install` (no `-U`).
+- **validate.sh printed empty sections.** `conda run ... python - <<HEREDOC` does
+  not forward stdin on conda 25.x; the probe now runs from a temp file.
+- **ensure_conda** now checks `~/miniforge`, `~/miniconda3`, `~/anaconda3`, and
+  `~/miniforge3` (was only the first two; conda is often off-PATH in
+  non-interactive shells).
+- Setup log now written into the project dir (was the skill dir).
+
+### Changed
+- Docs (SKILL/TROUBLESHOOTING/UPDATE/README/CLAUDE) fully rewritten to match the
+  conda-first scripts; all `uv`/`ml-env/` venv references removed.
+- **Prefer latest versions** (verified 2026-07-14): Python 3.13, PyTorch 2.13.0,
+  CUDA cu130 (not cu132 — fleet NVIDIA boxes are driver 580.x = max CUDA 13.0),
+  ROCm rocm7.2. Versions are overridable vars at the top of setup-universal.sh.
+- Blackwell (sm_120+) no longer treated as experimental — PyTorch 2.13 on cu130
+  supports it natively.
+- Env-var guidance flipped to "do not set globally" (HSA_ENABLE_SDMA,
+  PYTORCH_HIP_ALLOC_CONF), matching strix-halo-setup v2.0.0.
+
+### Removed
+- `CLAUDE_WEBHOOK.md` (off-topic GitHub-app boilerplate; workflow already in
+  `.github/workflows/claude.yml`).
+- Generic PyTorch tutorial content from TROUBLESHOOTING.md (OOM/mixed-precision
+  training loops) — deferred to the PyTorch docs.
+
 ## [2026-01-28] - ROCm 7 Preferred for Strix Halo
 
 ### Changed

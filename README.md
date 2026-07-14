@@ -1,169 +1,116 @@
 # ML Environment Skill for Claude Code
 
-A Claude Code skill that sets up isolated ML environments with PyTorch. **Automatically detects your hardware** (NVIDIA GPU, AMD GPU, or CPU) and installs the appropriate PyTorch build.
+A Claude Code skill that sets up **isolated conda environments** with PyTorch.
+It **auto-detects your hardware** (NVIDIA, AMD, or CPU) and installs the matching
+PyTorch build, then validates it works.
 
-Supports:
-- **NVIDIA GPUs**: RTX 3090, 4060, 5090, GB200, etc. (CUDA 12.8/13.0)
-- **AMD GPUs**: RDNA 2/3, Strix Halo (ROCm 6.2/6.4.4+/7.x)
-- **CPU-only**: For any system without GPU
-- **WSL2**: Windows Subsystem for Linux support
+Designed for consistency across a small fleet of Linux boxes — NVIDIA (Ampere /
+Ada / Blackwell), AMD Strix Halo (gfx1151), and CPU-only.
 
 ## Installation
 
-### Option 1: Symlink (Recommended - Get Updates)
-
-Clone the repository, then symlink the skill directory:
+### Option 1: Symlink (recommended — get updates via `git pull`)
 
 ```bash
-# Clone once
-git clone https://github.com/ianbarber/ml-env-setup.git
-
-# Symlink to Claude Code skills directory (all users can install this way)
+git clone https://github.com/ianbarber/ml-env-setup.git ~/ml-env-setup
 ln -s ~/ml-env-setup/skill ~/.claude/skills/ml-env
-
-# Get updates anytime
+# Update later:
 cd ~/ml-env-setup && git pull
 ```
 
-### Option 2: Copy (Standalone)
-
-Clone and copy the skill directory:
+### Option 2: Copy (standalone)
 
 ```bash
 git clone https://github.com/ianbarber/ml-env-setup.git
 cp -r ~/ml-env-setup/skill ~/.claude/skills/ml-env
 ```
 
-## Quick Start
+Requires **conda** (Miniforge/Miniconda/Anaconda) on the machine. `uv` is used as
+a faster pip front-end when present, but is optional.
 
-Once installed, ask Claude Code:
+## Quick start
+
+Once installed, in a Claude Code session:
 
 ```
 Help me set up a new ML project at ~/my-ml-project
 ```
 
-Claude will:
-1. Create your project directory
-2. Detect your hardware (NVIDIA/AMD/CPU)
-3. Install PyTorch with the right backend
-4. Set up ML libraries (numpy, pandas, scikit-learn, jupyter, etc.)
-5. Validate the installation
-6. Show you how to activate and use it
+Claude creates the project dir, then runs the setup script, which:
 
-## What You Get
+1. Detects hardware (NVIDIA / AMD / CPU / WSL2).
+2. Creates a conda env `ml-<project>` (Python 3.13).
+3. Installs **PyTorch 2.13.0** with the right backend (CUDA `cu130`, ROCm `7.2`,
+   or CPU; gfx1151 uses verified AMD tracks).
+4. Installs common ML libs (numpy, pandas, scikit-learn, jupyter, …).
+5. Writes a `.gitignore` and a setup log into the project.
 
-Each project gets:
-- **ml-env/** - Isolated Python environment with PyTorch
-- **.gitignore** - Ignores ml-env/, data/, models/, logs/, etc.
+## Using your environment
 
-Everything else is in the skill at `~/.claude/skills/ml-env/`:
-- **SKILL.md** - Interactive setup and troubleshooting guide
-- **TROUBLESHOOTING.md** - Detailed hardware-specific setup (Strix Halo, WSL2, etc.)
-- **UPDATE.md** - Updating PyTorch and dependencies
-- **scripts/** - Setup and validation scripts
+```bash
+conda activate ml-<project>
+python -c "import torch; print(torch.__version__, torch.cuda.is_available())"
+```
 
-## Using Your Environment
+Override the env name or versions at setup time:
+
+```bash
+ENV_NAME=myexp PYTHON_VERSION=3.12 bash ~/.claude/skills/ml-env/scripts/setup-universal.sh
+```
+
+## Validating
 
 ```bash
 cd ~/my-ml-project
-
-# Activate the environment
-source ml-env/bin/activate
-
-# Or if you use conda
-source ml-env/activate-safe.sh
-
-# Start coding
-python your_script.py
+ENV_NAME=ml-<project> bash ~/.claude/skills/ml-env/scripts/validate.sh
 ```
 
-## Verifying Installation
+Reports Python, PyTorch, backend (CUDA/ROCm), device + compute capability / gfx
+arch, and runs a real matmul.
 
-```bash
-# Check PyTorch and GPU
-python -c "import torch; print(torch.__version__); print(f'CUDA: {torch.cuda.is_available()}')"
+## Version defaults (verified 2026-07-14; prefer latest)
 
-# Run full validation
-bash ~/.claude/skills/ml-env/scripts/validate.sh
-```
+| Component | Default | Notes |
+|---|---|---|
+| Python | 3.13 | overridable via `PYTHON_VERSION` |
+| PyTorch | 2.13.0 | latest stable on the indexes below |
+| CUDA (NVIDIA) | cu130 | CUDA 13.0; cu132 needs newer drivers |
+| ROCm (generic AMD) | rocm7.2 | |
+| gfx1151 (Strix Halo) | TheRock multi-arch nightly | official wheels don't work |
 
-## Features
+## Supported hardware
 
-- 🔍 **Auto-detection**: Identifies NVIDIA, AMD, CPU hardware and installs the right PyTorch build
-- 🚀 **Fast setup**: Uses `uv` for faster package installation
-- 🎯 **Interactive**: Claude guides you through setup with questions for special hardware
-- 🤖 **Claude integrated**: Works directly in Claude Code - no command line needed
-- 📝 **Comprehensive docs**: Troubleshooting guides for all supported GPUs
-- ✅ **Validation**: Built-in testing to verify your installation
-- 🔄 **WSL2 support**: Works seamlessly on Windows Subsystem for Linux
-- 📦 **Project-ready**: Each project gets isolated environments with its own PyTorch version
+- **NVIDIA**: RTX 30/40/50 series, GB10, data-center — CUDA `cu130`. Blackwell
+  (sm_120+) is supported natively by PyTorch 2.13. WSL2 with Windows drivers.
+- **AMD RDNA / other** (non-gfx1151): ROCm `rocm7.2`. Requires `render`+`video`
+  groups.
+- **AMD Strix Halo** (gfx1151): special — see
+  [TROUBLESHOOTING.md](skill/TROUBLESHOOTING.md). TheRock nightly (default) or
+  AMD-supported stable (ROCm 7.2.1). Deep setup (GTT memory, flash-SDPA, kernels)
+  is owned by the [strix-halo-setup](https://github.com/ianbarber/strix-halo-skills)
+  skill.
+- **CPU-only**: works anywhere.
 
-## Current Versions (2026)
+## What's in the skill
 
-- **PyTorch**: 2.10.0
-- **Python**: 3.13 (or 3.12 if needed)
-- **CUDA**: 12.8 (stable), 13.0 (Blackwell experimental)
-- **ROCm**: 6.2 (RDNA), 6.4.4+/7.x (Strix Halo)
-- **Key libraries**: numpy, pandas, matplotlib, scikit-learn, jupyter, accelerate, tensorboard
-
-## Supported Hardware
-
-### NVIDIA GPUs
-- RTX 50 series (5090, 5080, etc.) - Blackwell - CUDA 13.0 experimental
-- RTX 40 series (4090, 4080, 4060, etc.) - Ada Lovelace - CUDA 12.8
-- RTX 30 series (3090, 3080, etc.) - Ampere - CUDA 12.8
-- WSL2 with Windows NVIDIA drivers
-
-### AMD GPUs
-- **RDNA 3** (RX 7000 series) - ROCm 6.2
-- **RDNA 2** (RX 6000 series) - ROCm 6.2
-- **Strix Halo** (Ryzen AI MAX+, gfx1151) - ROCm 6.4.4+/7.x (requires special setup)
-
-### CPU-Only
-- Works on any system without GPU
-- Good for development and testing
-
-## Common Questions
-
-**Q: Do I need to clone the repo after installing the skill?**
-A: No, symlink is enough. But keeping the repo lets you easily pull updates.
-
-**Q: How do I update PyTorch or packages?**
-A: See `~/.claude/skills/ml-env/UPDATE.md` or ask Claude in your project.
-
-**Q: Can I have multiple projects with different PyTorch versions?**
-A: Yes! Each project has its own isolated `ml-env/` - you can customize each one.
-
-**Q: Strix Halo setup looks complicated. Do I need special configuration?**
-A: Claude will guide you through it. See `~/.claude/skills/ml-env/TROUBLESHOOTING.md` for GTT memory setup.
-
-**Q: What about WSL2 on Windows?**
-A: Works great! Just use Windows NVIDIA drivers (don't install Linux drivers in WSL2).
+`~/.claude/skills/ml-env/`:
+- **SKILL.md** — interactive setup & troubleshooting entry point.
+- **TROUBLESHOOTING.md** — hardware-specific issues (Strix Halo, WSL2, drivers).
+- **UPDATE.md** — updating PyTorch and packages.
+- **scripts/setup-universal.sh**, **scripts/validate.sh**.
 
 ## Contributing
 
-This is a single-purpose skill repo. Contributions welcome:
+Testing checklist:
+- [ ] Runs on your hardware (NVIDIA / AMD / CPU)
+- [ ] Hardware detection is correct
+- [ ] PyTorch installs and detects the GPU
+- [ ] `validate.sh` passes
 
-**Testing checklist:**
-- [ ] Runs on your hardware type (NVIDIA/AMD/CPU)
-- [ ] Hardware detection works correctly
-- [ ] PyTorch installs and detects GPU/CPU
-- [ ] Validation passes
-- [ ] Skill guides users properly
-
-### Changes to make:
-
-1. **Hardware support**: Update `scripts/setup-universal.sh` hardware detection
-2. **Skill guidance**: Update `skill/SKILL.md` with new workflows
-3. **Documentation**: Update troubleshooting or setup docs
-4. **Scripts**: Improve setup or validation logic
+Changes: update `scripts/setup-universal.sh` for hardware logic, `SKILL.md` /
+`TROUBLESHOOTING.md` for guidance, and keep the version table here and in
+`CLAUDE.md` in sync.
 
 ## License
 
-MIT License - Free to use and modify.
-
-## Support
-
-- **Issues**: Open an issue on GitHub
-- **Questions**: Ask Claude Code directly once the skill is installed
-- **Full docs**: See `~/.claude/skills/ml-env/TROUBLESHOOTING.md` after installation
+MIT — free to use and modify.

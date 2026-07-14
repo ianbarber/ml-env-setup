@@ -67,20 +67,23 @@ ml-env-setup/
 
 ### When Modifying Scripts
 
-**Hardware Detection (setup-universal.sh lines 37-67):**
+**Hardware Detection (`detect_gpu()` / `get_nvidia_compute_cap()` / `get_amd_gfx_arch()` in setup-universal.sh):**
 - Add detection logic for new GPU types
 - Test with mock detection before release
 - Document in TROUBLESHOOTING.md
 
-**PyTorch Installation (setup-universal.sh lines 139-292):**
-- Update index URLs when PyTorch/CUDA/ROCm versions change
-- Strix Halo (gfx1151) requires special attention - see reference to strix-halo-skills repo
-- Update CLAUDE.md version notes when changing major versions
+**PyTorch Installation (`install_pytorch()` / `install_gfx1151()`):**
+- Version defaults live in the `*_DEFAULT` vars at the top of the script.
+- gfx1151 uses its own verified tracks (see Special Cases below); do NOT route it
+  through the global `TORCH_VERSION`/`CUDA_INDEX` pins.
+- `install_ml_packages()` MUST use plain `pip` (not `uv`) with no `-U` — uv's
+  holistic upgrade re-resolves against PyPI and replaces a hardware-specific
+  torch (e.g. gfx1151 ROCm) with a CUDA wheel. (Bug found + fixed 2026-07-14.)
 
 **Validation (validate.sh):**
-- Add tests for new hardware types
-- Ensure comprehensive GPU memory/info reporting
-- Test with different PyTorch versions
+- The probe is written to a temp file and run via `conda run python <file>`.
+  Do NOT use `conda run ... python - <<HEREDOC` — conda run does not reliably
+  forward stdin, so the heredoc silently produces no output.
 
 ### When Updating Documentation
 
@@ -112,41 +115,48 @@ ml-env-setup/
 Keep CLAUDE.md, SKILL.md, and setup-universal.sh in sync:
 
 ```
-# Current as of 2026-01-28
-PyTorch: 2.10.0
-Python: 3.13 (default), 3.12, 3.11 (avoid 3.14 - ML package compatibility issues)
-CUDA: 12.8, 13.0
-ROCm: 6.2 (RDNA), 7.x preferred for Strix Halo (6.4.4+ as fallback)
+# Current as of 2026-07-14 (prefer latest, verified against live indexes + fleet)
+PyTorch: 2.13.0           # NVIDIA/CPU/generic-AMD; gfx1151 nightly resolves ~2.12
+Python: 3.13 (default; gfx1151 AMD-stable alt track needs 3.12)
+CUDA:   cu130 (CUDA 13.0)  # cu132 exists but fleet NVIDIA boxes are driver 580.x = max CUDA 13.0
+ROCm:   rocm7.2 (generic AMD); gfx1151 → TheRock whl-multi-arch nightly (default) or AMD stable 7.2.1
 ```
 
-**Note**: The setup-universal.sh script defaults to Python 3.13. Users can change to 3.12 or 3.11 if needed, but Python 3.14 should be avoided due to ML package compatibility issues.
+All of the above are overridable vars at the top of `setup-universal.sh`
+(`PYTHON_VERSION`, `TORCH_VERSION`, `CUDA_INDEX`, `ROCM_INDEX`) — bumps are one
+line. The gfx1151 path ignores those and uses its own verified tracks in
+`install_gfx1151()`.
 
 Update these files when new versions release:
-1. setup-universal.sh - update download URLs and version strings
-2. SKILL.md - update "Current Versions" section
+1. setup-universal.sh - update the `*_DEFAULT` vars + gfx1151 pinned URLs
+2. SKILL.md - update "Version Defaults" table
 3. CLAUDE.md - update version notes here
-4. README.md - update supported versions
+4. README.md - update version table
 
 ### Special Cases to Remember
 
 **Strix Halo (gfx1151) AMD GPU:**
-- Most complex hardware path
-- Official PyTorch wheels completely incompatible
-- **ROCm 7 stable (recommended)**: `https://repo.amd.com/rocm/whl/gfx1151/`
-- **ROCm 6.4.4+ nightlies (fallback)**: `https://rocm.nightlies.amd.com/v2/gfx1151/`
-- ROCm 7 provides ~2.5x performance improvement (~31 TFLOPS BF16 vs ~12 TFLOPS)
-- User must be in render/video groups
-- GTT memory configuration needed for 30B+ models
-- Reference project: ~/Projects/amdtest
-- See also: https://github.com/ianbarber/strix-halo-skills
+- Most complex hardware path. Official PyTorch wheels are incompatible
+  (`HIP error: invalid device function`).
+- **Default track — TheRock multi-arch nightly**: `--index-url
+  https://rocm.nightlies.amd.com/whl-multi-arch/ "torch[device-gfx1151]"`
+  (latest ~2.12, clean PEP 503 index, no hardcoded-URL rot).
+- **Alt track — AMD supported stable (ROCm 7.2.1, torch 2.9.1)**: pinned cp312
+  wheels from `repo.radeon.com/rocm/manylinux/rocm-rel-7.2.1/`. **Needs Python 3.12.**
+- **Deprecated** (do not use): `repo.amd.com/rocm/whl/gfx1151/` (serves only
+  torch 2.9.1, was mislabeled stable) and `…/v2/gfx1151/` (retired).
+- **Env vars**: do NOT set `HSA_ENABLE_SDMA`/`PYTORCH_HIP_ALLOC_CONF` globally
+  (matches strix-halo-setup v2.0.0). Only opt-in: `TORCH_ROCM_AOTRITON_ENABLE_EXPERIMENTAL=1`.
+- User must be in `render`/`video` groups; GTT/flash-SDPA/kernel work is owned by
+  the **strix-halo-setup** skill (`~/Projects/amdtest`,
+  https://github.com/ianbarber/strix-halo-skills); flash build kit:
+  https://github.com/ianbarber/strix-halo-flashattn-build.
 
-**Blackwell GPU (RTX 5090):**
-- sm_120+ is experimental in PyTorch 2.9.0
-- Three options offered during setup:
-  1. PyTorch 2.9.0 with CUDA 13.0 (experimental)
-  2. PyTorch nightly (cutting edge)
-  3. PyTorch 2.9.0 with CUDA 12.8 + PTX JIT fallback
-- May need future updates as support matures
+**Blackwell GPU (RTX 5090 / GB10, sm_120+):**
+- Natively supported by PyTorch 2.13.0 on cu130 — no special menu or "experimental"
+  handling. Just the standard NVIDIA/cu130 path.
+- Fleet boxes (steed GB10, leejr RTX 5090) are driver 580.x (max CUDA 13.0), so
+  cu130 is correct; cu132 would need newer drivers.
 
 **WSL2:**
 - Uses Windows NVIDIA drivers (NOT Linux drivers)
@@ -180,12 +190,12 @@ rm -rf "$TEST_DIR"
 
 ### Adding New Hardware Support
 
-1. Update `setup-universal.sh:detect_gpu()` (lines 45-67)
-2. Update `setup-universal.sh:get_[nvidia|amd]_info()` (lines 69-108)
-3. Update `setup-universal.sh:determine_pytorch_install()` (lines 139-292)
+1. Update `setup-universal.sh:detect_gpu()`
+2. Update `setup-universal.sh:get_nvidia_compute_cap()` / `get_amd_gfx_arch()`
+3. Update `setup-universal.sh:install_pytorch()` (and `install_gfx1151()` if gfx-related)
 4. Add troubleshooting section to TROUBLESHOOTING.md
 5. Update SKILL.md "Hardware-Specific Guidance" section
-6. Test in README.md "Contributing" checklist
+6. Test against the README.md "Contributing" checklist
 
 ### Modifying Claude Skill Behavior
 

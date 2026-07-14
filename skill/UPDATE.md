@@ -1,158 +1,91 @@
 # Updating and Version Management
 
-## Checking Current Versions
+How to inspect, update, and recreate ml-env conda environments.
 
-### Check PyTorch and CUDA versions
-
-First, activate your project's environment. From your project directory:
+## Check current versions
 
 ```bash
-source ml-env/bin/activate
-python -c 'import torch; print(f"PyTorch: {torch.__version__}"); print(f"CUDA: {torch.version.cuda}")'
+conda activate ml-<project>
+python -c "import torch; print('torch', torch.__version__); print('cuda', torch.version.cuda); print('hip', getattr(torch.version,'hip',None))"
+python -m pip list
+python -m pip list --outdated
 ```
 
-Or if using conda and the conda-safe wrapper:
+## Update PyTorch
+
+Latest stable lives at https://pytorch.org/get-started/locally/ . ml-env defaults
+(PyTorch 2.13.0, cu130 / rocm7.2) are overridable vars at the top of
+`setup-universal.sh`.
 
 ```bash
-source ml-env/activate-safe.sh
-python -c 'import torch; print(f"PyTorch: {torch.__version__}"); print(f"CUDA: {torch.version.cuda}")'
+conda activate ml-<project>
+
+# NVIDIA (cu130 default)
+python -m pip install --upgrade --index-url https://download.pytorch.org/whl/cu130 \
+  torch torchvision torchaudio
+
+# generic AMD (rocm7.2)
+python -m pip install --upgrade --index-url https://download.pytorch.org/whl/rocm7.2 \
+  torch torchvision torchaudio
 ```
 
-### Check all installed packages
+### Strix Halo (gfx1151)
+```bash
+# Track 1 — TheRock nightly (default): latest torch
+python -m pip install --upgrade --index-url https://rocm.nightlies.amd.com/whl-multi-arch/ \
+  "torch[device-gfx1151]" "torchvision[device-gfx1151]" torchaudio
+
+# Track 2 — AMD supported stable (ROCm 7.2.1, torch 2.9.1, needs Python 3.12):
+#   reinstall the pinned wheels from repo.radeon.com/rocm/manylinux/rocm-rel-7.2.1/
+#   (exact URLs in TROUBLESHOOTING.md → "Strix Halo")
+```
+Avoid the retired `…/v2/gfx1151/` and the `repo.amd.com` gfx1151 indexes.
+
+> **Do not** run `pip install -U accelerate` (or `uv pip install -U <pkgs>`) after
+> a gfx1151 install — uv's holistic upgrade can replace the ROCm torch with a CUDA
+> wheel. Install other packages with plain `pip install` (no `-U`).
+
+## Update other packages
 
 ```bash
-source ml-env/bin/activate
-uv pip list
+conda activate ml-<project>
+python -m pip install --upgrade <package-name>
 ```
 
-### Check for outdated packages
+## Driver / CUDA check (NVIDIA)
 
 ```bash
-source ml-env/bin/activate
-uv pip list --outdated
+nvidia-smi                      # "CUDA Version: X.Y" = driver's max supported
+python -c "import torch; print(torch.cuda.get_device_capability(0))"
 ```
+The `cu130` wheels need a driver that supports CUDA 13.0 (580+). If `nvidia-smi`
+reports an older max, use the `cu128` index instead.
 
-## Updating PyTorch
-
-### Check for newer PyTorch versions
-
-Visit: https://pytorch.org/get-started/locally/
-
-Or check available versions:
+## Recreate the environment from scratch
 
 ```bash
-uv pip index versions torch --index-url https://download.pytorch.org/whl/cu128
-```
-
-### Update to a specific version (NVIDIA CUDA 12.8)
-
-```bash
-source ml-env/bin/activate
-uv pip install torch==2.X.Y torchvision torchaudio --index-url https://download.pytorch.org/whl/cu128 --upgrade
-```
-
-### Update to the latest compatible version (NVIDIA)
-
-```bash
-source ml-env/bin/activate
-uv pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu128 --upgrade
-```
-
-### Update to specific ROCm version (AMD)
-
-```bash
-source ml-env/bin/activate
-uv pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/rocm6.2 --upgrade
-```
-
-### Update for Strix Halo (AMD gfx1151)
-
-```bash
-source ml-env/bin/activate
-uv pip install --index-url https://rocm.nightlies.amd.com/v2/gfx1151/ --pre torch torchvision torchaudio --upgrade
-```
-
-## Updating Other Packages
-
-### Update a specific package
-
-```bash
-source ml-env/bin/activate
-uv pip install --upgrade package-name
-```
-
-### Update all packages (use with caution)
-
-```bash
-source ml-env/bin/activate
-uv pip list --outdated | tail -n +3 | awk '{print $1}' | xargs -n1 uv pip install --upgrade
-```
-
-Note: This may break compatibility. Consider testing in a separate environment first.
-
-## Checking NVIDIA Driver and CUDA Toolkit
-
-### Check NVIDIA driver version
-
-```bash
-nvidia-smi
-```
-
-### Check CUDA toolkit version
-
-```bash
-nvcc --version
-```
-
-### Verify GPU compute capability
-
-```bash
-source ml-env/bin/activate
-python -c 'import torch; print(f"GPU Compute Capability: {torch.cuda.get_device_capability(0)}")'
-```
-
-Expected output for RTX 5090: `(12, 0)` indicating SM120
-
-## Recreating the Environment from Scratch
-
-If something goes wrong, you can recreate the environment. From your project directory:
-
-```bash
-rm -rf ml-env
+conda env remove -n ml-<project>
+cd /path/to/project
 bash ~/.claude/skills/ml-env/scripts/setup-universal.sh
 ```
+Or override defaults: `ENV_NAME=... PYTHON_VERSION=3.12 TORCH_VERSION=2.13.0
+CUDA_INDEX=cu130 bash setup-universal.sh`.
 
-Or ask Claude to help you recreate it:
-
-```
-Help me recreate my ML environment - something isn't working
-```
-
-## Exporting Environment Configuration
-
-To create a reproducible environment specification:
+## Export / reproduce an environment
 
 ```bash
-source ml-env/bin/activate
-uv pip freeze > requirements.txt
+conda activate ml-<project>
+python -m pip freeze > requirements-lock.txt
+python -m torch.utils.collect_env > collect-env.txt     # full diagnostics
+
+# Recreate elsewhere:
+conda create -y -n ml-<project> python=3.13
+conda activate ml-<project>
+python -m pip install -r requirements-lock.txt
 ```
 
-To recreate from requirements in a new environment:
-
-```bash
-uv venv new-ml-env --python 3.13
-source new-ml-env/bin/activate
-uv pip install -r requirements.txt
-```
-
-## Updating uv itself
+## Update uv (when present)
 
 ```bash
 curl -LsSf https://astral.sh/uv/install.sh | sh
-```
-
-Or if installed via pip:
-
-```bash
-pip install --upgrade uv
 ```
