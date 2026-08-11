@@ -1,4 +1,27 @@
-# ML Environment Skill for Claude Code
+# ML Environment Skill for Claude Code — ARCHIVED / UNMAINTAINED
+
+> **This project is dead. Do not use it.**
+>
+> Archived 2026-08-10 and uninstalled from every machine it ran on. Nothing here
+> is maintained, and the version pins below will rot without warning.
+>
+> **Why:** the skill wrapped `conda create` + `pip install --index-url ...` in
+> ~900 lines of scripts and docs, and imposed an `ml-<project>` env-naming
+> convention that nobody actually used. In practice every real environment was
+> created and named by hand. The only content that genuinely earned its keep was
+> a short list of hardware gotchas — not a setup tool.
+>
+> **Where the useful parts went:**
+> - **AMD Strix Halo (gfx1151)** — all of it, plus much more depth (GTT memory,
+>   flash-SDPA, kernel checks, real backend probes): use
+>   [strix-halo-skills](https://github.com/ianbarber/strix-halo-skills).
+> - **NVIDIA / generic AMD / CPU** — no replacement, and none needed. Use the
+>   official selector at <https://pytorch.org/get-started/locally/>, which is
+>   always more current than a pinned table in a README.
+>
+> The historical content below is left as-is for reference only.
+
+---
 
 A Claude Code skill that sets up **isolated conda environments** with PyTorch.
 It **auto-detects your hardware** (NVIDIA, AMD, or CPU) and installs the matching
